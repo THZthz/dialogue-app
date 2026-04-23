@@ -89,7 +89,7 @@ export const CharacterPanel: React.FC = () => {
                     </div>
                     <div className="p-4 bg-[#1a1a1a] border border-white/5 rounded-sm">
                       <div className="text-[18px] font-sans text-white mb-1">{character.name}</div>
-                      <div className="text-[12px] text-gray-500 uppercase tracking-wider">Disillusioned Detective</div>
+                      <div className="text-[12px] text-gray-500 uppercase tracking-wider">Wandering Outsider</div>
                     </div>
                   </div>
 

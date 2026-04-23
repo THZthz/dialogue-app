@@ -1,62 +1,62 @@
 import { WorldEntity, WorldState, Character, Location, WorldObject } from '../types/entities';
 
 const initialObjects: Record<string, WorldObject> = {
-  'lickra_brand': {
-    id: 'lickra_brand',
+  'rusted_coin': {
+    id: 'rusted_coin',
     type: 'OBJECT',
-    displayName: 'Lickra(TM)',
-    shortDescription: 'A high-performance synthetic fabric often found in the most questionable of garments.',
-    longDescription: 'Developed in the late fifties, Lickra(TM) was marketed as the "Fabric of the Future." It is known for its incredible elasticity and its uncanny ability to retain odors for decades. In Revachol, it is the primary component of low-end "athleisure" wear favored by the functionally destitute.',
+    displayName: 'Rusted Iron Coin',
+    shortDescription: 'A heavy, notched currency from the Old Duchy.',
+    longDescription: 'The iron is pitted with rust, but the seal of the dead Duke is still visible. It smells of copper and damp earth. In a place like the Crimson Veil, it might buy you a half-measure of watered wine or a very short conversation.',
     attributes: {
-      'Elasticity': 'High',
-      'Breathability': 'Zero'
+      'Value': 'Near-worthless',
+      'Origin': 'Duchy of Oros'
     }
   },
-  'horrific_necktie': {
-    id: 'horrific_necktie',
+  'velvet_choker': {
+    id: 'velvet_choker',
     type: 'OBJECT',
-    displayName: 'Horrific Necktie',
-    shortDescription: 'A loud, silk-blend garment that seems to be screaming at your eyes.',
-    longDescription: 'The patterns on this tie are not just tacky; they are aggressive. It feels like it\'s vibrating at a frequency specifically designed to annoy anyone with a shred of dignity. It has also, on occasion, claimed to be your best friend.',
+    displayName: 'Stained Velvet Choker',
+    shortDescription: 'Once elegant, now frayed and smelling of heavy musk.',
+    longDescription: 'The deep red fabric is stiff with age and sweat. It has a small, tarnished silver clasp that looks like a weeping eye. It belongs to Vespera, though she hasn\'t worn it since the plague years.',
     attributes: {
-      'Style': 'Loud',
-      'Sentience': 'Debatable'
+      'Scent': 'Musk and Decay',
+      'Material': 'Velvet'
     }
   }
 };
 
 const initialLocations: Record<string, Location> = {
-  'whirling_in_rags': {
-    id: 'whirling_in_rags',
+  'crimson_veil': {
+    id: 'crimson_veil',
     type: 'LOCATION',
-    displayName: 'Whirling-in-Rags',
-    shortDescription: 'A hostel and cafeteria in Martinaise.',
-    longDescription: 'The primary social hub of the neighborhood. It smells of old grease, spilled beer, and the collective hopelessness of its patrons. The floorboards creak with the weight of forgotten dreams.',
+    displayName: 'The Crimson Veil',
+    shortDescription: 'A sagging timber-frame structure in the lower district.',
+    longDescription: 'The air inside is thick with the smoke of tallow candles and cheap hashish. The walls are draped in moth-eaten tapestries that attempt to hide the rot. It is a place where secrets are bought for coppers and dignity is the first thing checked at the door.',
     attributes: {
-      'Social Class': 'Low',
-      'Ambiance': 'Grimy'
+      'Atmosphere': 'Oppressive',
+      'Patronage': 'Desperate'
     }
   }
 };
 
 const initialCharacters: Record<string, Character> = {
-  'kim_kitsuragi': {
-    id: 'kim_kitsuragi',
+  'madam_vespera': {
+    id: 'madam_vespera',
     type: 'CHARACTER',
-    displayName: 'Kim Kitsuragi',
-    shortDescription: 'A lieutenant from the 57th Precinct. Professional, patient, and stoic.',
-    longDescription: 'Lieutenant Kim Kitsuragi is your partner in this investigation. He wears an orange bomber jacket and a constant expression of professional detachment. He seems to have an infinite capacity for tolerating your eccentricities.',
+    displayName: 'Madam Vespera',
+    shortDescription: 'The iron-willed matron of the Crimson Veil.',
+    longDescription: 'Vespera is a woman of indeterminate age, her face a map of hard decisions and cold winters. She wears a dress of faded brocade and carries a heavy ring of keys that jingles with every rhythmic step. Her eyes see not your face, but the weight of your coin purse.',
     stats: {
-      'authority': 4,
-      'logic': 5,
-      'volition': 5
+      'authority': 7,
+      'logic': 4,
+      'volition': 6
     },
     opinions: {
-      'YOU': 'A complicated individual with a questionable grasp on reality, but a detective nonetheless.'
+      'YOU': 'A stray dog with better boots than most. Potentially useful, likely trouble.'
     },
     attributes: {
-      'Rank': 'Lieutenant',
-      'Precinct': '57th'
+      'Status': 'Matron',
+      'Affiliation': 'The Veiled'
     }
   }
 };

@@ -59,7 +59,7 @@ Dialogue messages support interactive object links using a custom markdown-like 
 `[Object Name](#object_id)`
 
 - **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
-- **GeminiService (`src/services/GeminiService.ts`)**: Handles dynamic AI dialogue using the Gemini model. This system allows the game to evolve "on the fly," with the LLM modifying object descriptions and character opinions based on user interaction.
+- **LlmService (`src/services/LlmService.ts`)**: Handles dynamic AI dialogue using **Vercel AI SDK** with the **DeepSeek** model. This system uses `generateObject` with a **Zod schema** to ensure structured outputs for dialogue, world updates, and suggested options.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 
@@ -115,3 +115,14 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 - `TypingIndicator.tsx`: The "..." animated feedback.
 - `ObjectLink.tsx`: Parses object references and manages the hover-persistent state.
 - `ObjectTooltip.tsx`: Renders the detailed object lore and allows interaction via a "hover-bridge" padding technique.
+
+---
+
+## 7. Maintenance Log
+
+### 2026-04-23
+- **LLM Upgrade**: Migrated from Google Generative AI SDK to **Vercel AI SDK** (`ai`).
+- **Model Switch**: Now using **DeepSeek-V3** (`deepseek-chat`) for narratively rich and structured RPG responses.
+- **Type Safety**: Integrated **Zod** in `LlmService.ts` for automated schema validation of AI responses.
+- **UI Polish**: Applied global scrollbar hiding in `index.css` to enhance cinematic immersion while preserving scroll functionality.
+- **Instruction Refinement**: Hardened the system prompt and Zod schema to prevent "response did not match schema" errors (using `.nullish()` and objective-oriented prompting).

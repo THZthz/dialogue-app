@@ -5,98 +5,71 @@ export const sampleDialogue: Record<string, DialogueStep> = {
     id: 'start',
     messages: [
       {
-        speaker: 'INLAND EMPIRE',
+        speaker: 'HALF LIGHT',
         type: 'INNER_VOICE',
-        text: 'Good, these people know your *true* name. Looks like it has proceeded you, Mr Sunset. More on that later.',
+        text: 'The smell of rot and cheap incense hit you like a physical blow. Somewhere in the shadows, a blade is being sharpened. You skip a heartbeat. *Do not turn your back.*',
         skillCheck: {
-          skill: 'Inland Empire',
+          skill: 'Half Light',
           difficulty: 'Easy',
           success: true
         }
-      },
-      {
-        speaker: 'HORRIFIC NECKTIE',
-        type: 'CHARACTER',
-        text: 'I like this guy. You should, too. He *respects* you by calling you by your [true name](#tequila_sunset). Also, your [tie](#horrific_necktie) is vibrating.'
-      },
-      {
-        speaker: 'YOU',
-        type: 'YOU',
-        text: '"Not too hot. I\'m on a 50-year losing streak."'
-      },
-      {
-        speaker: 'IDIOT DOOM SPIRAL',
-        type: 'CHARACTER',
-        text: '"That\'s harsh. I\'m like three or maybe four years into mine. Wait no, make it five." He looks at his shit-stained [Lickra(TM)](#lickra_brand) with a grim expression.'
       },
       {
         speaker: 'SYSTEM',
         type: 'SYSTEM',
-        text: '"Things aren\'t going super well for Idiot Doom Spiral, either. Haven\'t found those keys yet; haven\'t won that great piece of ass back. No word from my business-buddies..." He takes a sip from his [beer](#intentional_unknown_obj).'
+        text: 'You push past the heavy leather curtain into the main hall of [The Crimson Veil](#crimson_veil). The air is a thick soup of tallow smoke and unwashed bodies.'
       },
       {
-        speaker: 'SUGGESTION',
+        speaker: 'MADAM VESPERA',
+        type: 'CHARACTER',
+        text: '"We don\'t see your kind often, stranger. Too much polish on those boots for the mud of the lower district. What are you looking for? Solace? Or a place to hide?"'
+      },
+      {
+        speaker: 'INLAND EMPIRE',
         type: 'INNER_VOICE',
-        text: 'This guy\'s your buddy-buddy. You feel it immediately: you belong to an organization. A fraternity. Of *drunks*.',
+        text: 'Her [velvet choker](#velvet_choker) pulsates. A tiny, rhythmic throb. It remembers the throats of the dead. It wants to tell you about the plague.',
         skillCheck: {
-          skill: 'Suggestion',
-          difficulty: 'Easy',
+          skill: 'Inland Empire',
+          difficulty: 'Medium',
           success: true
         }
+      },
+      {
+        speaker: 'YOU',
+        type: 'YOU',
+        text: '"I am not here for solace, Madam. I am here for a man. They call him the Red Knight."'
+      },
+      {
+        speaker: 'MADAM VESPERA',
+        type: 'CHARACTER',
+        text: '"The Red Knight?" She spits onto the rush-covered floor. "A name like that costs more than a [rusted coin](#rusted_coin). Information is the only currency I value more than silver, and you don\'t look like you have much of either."'
       }
     ],
     options: [
       {
-        id: 'opt1',
-        text: '"What do you guys do around here?"',
-        nextStepId: 'about_here'
-      },
-      {
-        id: 'opt_ai',
-        text: '[Consult the Void] "What do you think about my partner, Kim?"',
-        isAiTrigger: true
-      },
-      {
-        id: 'opt2',
-        text: '"What is a... Tequila Sunset? You keep saying it."',
-        nextStepId: 'tequila_sunset'
-      },
-      {
-        id: 'opt_check',
-        text: '"Wait, Doom Spiral. If you\'re here, and your friends are here... then who is at the pawn shop?"',
+        id: 'opt_charm',
+        text: '"Surely a woman of your... elegance... can appreciate a shared interest." [Charm her.]',
         check: {
-          skill: 'Logic',
-          difficulty: 8,
-          difficultyText: 'Medium',
+          skill: 'Suggestion',
+          difficulty: 10,
+          difficultyText: 'Challenging',
           diceCount: 2,
           conditions: [
             {
               expression: "dice[0] === 1 && dice[1] === 1",
-              stepId: 'snake_eyes',
+              stepId: 'charm_fail_crit',
               label: 'Critical Failure',
               color: 'text-red-700'
             },
             {
-              expression: "total >= 12",
-              stepId: 'logic_success',
-              label: 'Critical Success',
-              color: 'text-cyan-400'
-            },
-            {
               expression: "success",
-              stepId: 'logic_success',
+              stepId: 'charm_success',
               label: 'Success',
               color: 'text-green-500'
             },
             {
-              expression: "total >= 6",
-              stepId: 'logic_partial',
-              label: 'Partial Success',
-              color: 'text-yellow-500'
-            },
-            {
-              expression: "true", // Default fallback for any failure
-              stepId: 'logic_failure',
+              expression: "true",
+              stepId: 'charm_failure',
               label: 'Failure',
               color: 'text-red-500'
             }
@@ -104,120 +77,134 @@ export const sampleDialogue: Record<string, DialogueStep> = {
         }
       },
       {
-        id: 'opt3',
-        text: '"Be seein\' you." [Leave.]',
+        id: 'opt_threat',
+        text: '"Tell me what I want to know, or I\'ll burn this rat-nest to the ground." [Intimidate.]',
+        check: {
+          skill: 'Half Light',
+          difficulty: 12,
+          difficultyText: 'Hard',
+          diceCount: 2,
+          conditions: [
+            {
+              expression: "success",
+              stepId: 'intimidate_success',
+              label: 'Success',
+              color: 'text-green-500'
+            },
+            {
+              expression: "true",
+              stepId: 'intimidate_failure',
+              label: 'Failure',
+              color: 'text-red-500'
+            }
+          ]
+        }
+      },
+      {
+        id: 'opt_ai',
+        text: '[Consult the Void] "Who is the Red Knight, really?"',
+        isAiTrigger: true
+      },
+      {
+        id: 'opt_leave',
+        text: '"I\'ve seen enough. Farewell."',
         nextStepId: 'leave'
       }
     ]
   },
-  logic_partial: {
-    id: 'logic_partial',
+  charm_success: {
+    id: 'charm_success',
     messages: [
       {
-        speaker: 'LOGIC',
+        speaker: 'SUGGESTION',
         type: 'INNER_VOICE',
-        text: 'The connection is there, but it\'s fraying. You manage to plant a seed of doubt without quite knowing why.',
-        skillCheck: { skill: 'Logic', difficulty: 'Medium', success: true }
+        text: 'The ice in her gaze thaws, just a fraction. You caught the ghost of a smile.',
+        skillCheck: { skill: 'Suggestion', difficulty: 'Challenging', success: true }
       },
       {
-        speaker: 'IDIOT DOOM SPIRAL',
+        speaker: 'MADAM VESPERA',
         type: 'CHARACTER',
-        text: '"The shop? Well, Roy was supposed to be there. But now that you mention it... I haven\'t seen Roy since the sun was up. Hmm. Probably nothing."'
+        text: '"You have a silver tongue, stranger. Dangerous. The Red Knight was here, yes. He left an hour before the bells of Saint Agnes rang. Headed for the Iron Docks. Said he had a debt of blood to settle."'
       }
     ],
     options: [
-      { id: 'back', text: '"Let\'s hope it\'s nothing. Another thing..."', nextStepId: 'start' }
+      { id: 'back', text: '"Thank you, Madam. One more thing..."', nextStepId: 'start' }
     ]
   },
-  snake_eyes: {
-    id: 'snake_eyes',
+  charm_failure: {
+    id: 'charm_failure',
     messages: [
       {
-        speaker: 'LOGIC',
+        speaker: 'SUGGESTION',
         type: 'INNER_VOICE',
-        text: 'SNAKE EYES. The gears in your head grind to a halt with a sound like a car crash. You forgot your own name for a second, let alone the pawn shop.',
-        skillCheck: { skill: 'Logic', difficulty: 'Medium', success: false }
+        text: 'Your words land like wet clay. She looks at you as if you\'re a particularly dull child.',
+        skillCheck: { skill: 'Suggestion', difficulty: 'Challenging', success: false }
       },
       {
-        speaker: 'IDIOT DOOM SPIRAL',
+        speaker: 'MADAM VESPERA',
         type: 'CHARACTER',
-        text: '"You okay, Harry? You\'ve been staring at that beer for three minutes without blinking. It\'s not going to drink itself, you know."'
+        text: '"Save your flattery for the girls upstairs, boy. They\'re paid to pretend it works. I\'m not."'
       }
     ],
     options: [
-      { id: 'back', text: '"I... I need a moment."', nextStepId: 'start' }
+      { id: 'back', text: '"Apologies. Let me try another way."', nextStepId: 'start' }
     ]
   },
-  logic_success: {
-    id: 'logic_success',
+  charm_fail_crit: {
+    id: 'charm_fail_crit',
     messages: [
       {
-        speaker: 'LOGIC',
+        speaker: 'SUGGESTION',
         type: 'INNER_VOICE',
-        text: 'You got him. He freezes, beer halfway to his lips.',
-        skillCheck: { skill: 'Logic', difficulty: 'Medium', success: true }
+        text: 'CRITICAL FAILURE. You stutter, your voice hitting a high-pitched note that makes a nearby drunk choke on his ale. Vespera\'s hand drops to the heavy ring of keys at her belt.',
+        skillCheck: { skill: 'Suggestion', difficulty: 'Challenging', success: false }
       },
       {
-        speaker: 'IDIOT DOOM SPIRAL',
+        speaker: 'MADAM VESPERA',
         type: 'CHARACTER',
-        text: '"The... the pawn shop? Right. Roy! Roy is at the pawn shop. Or... no, Roy was with us at the harbour... oh god. THE SHOP IS UNGUARDED!"'
+        text: '"Get out. Before I have the boys show you how we handle jesters in this house. You\'re not half as clever as you think you are."'
       }
     ],
     options: [
-      { id: 'back', text: '"Anyway, let\'s move on."', nextStepId: 'start' }
+      { id: 'leave', text: '[Leave quickly before things get violent.]', nextStepId: 'leave' }
     ]
   },
-  logic_failure: {
-    id: 'logic_failure',
+  intimidate_success: {
+    id: 'intimidate_success',
     messages: [
       {
-        speaker: 'LOGIC',
+        speaker: 'HALF LIGHT',
         type: 'INNER_VOICE',
-        text: 'The gears turn, but they\'re clogged with whatever that liquid is in your flask. You lose the thread.',
-        skillCheck: { skill: 'Logic', difficulty: 'Medium', success: false }
+        text: 'The darkness in your voice matches the darkness in the room. She sees the killer in you.',
+        skillCheck: { skill: 'Half Light', difficulty: 'Hard', success: true }
       },
       {
-        speaker: 'IDIOT DOOM SPIRAL',
+        speaker: 'MADAM VESPERA',
         type: 'CHARACTER',
-        text: '"What pawn shop? I don\'t know any pawn shop. Are you looking for a pawn shop, officer? Because I can tell you where one *was*, back in \'42."'
+        text: '"Easy, wolf. No need to howl. The Red Knight is a regular. He\'s currently in the cellar, "negotiating" with some of my boys. If you want him, go. I won\'t weep if he doesn\'t come back up."'
       }
     ],
     options: [
-      { id: 'back', text: '"My mistake. Another thing..."', nextStepId: 'start' }
+      { id: 'back', text: '"Wise choice."', nextStepId: 'start' }
     ]
   },
-  about_here: {
-    id: 'about_here',
+  intimidate_failure: {
+    id: 'intimidate_failure',
     messages: [
       {
-        speaker: 'IDIOT DOOM SPIRAL',
+        speaker: 'HALF LIGHT',
+        type: 'INNER_VOICE',
+        text: 'Your voice cracks. The threat feels hollow in the face of her decades of dealing with much worse men.',
+        skillCheck: { skill: 'Half Light', difficulty: 'Hard', success: false }
+      },
+      {
+        speaker: 'MADAM VESPERA',
         type: 'CHARACTER',
-        text: '"Oh, you know. We survive. We drink. We wait for the apocalypse to finally put us out of our misery. It\'s a full-time job, really."'
+        text: '"You think you\'re the first person to threaten this house? I’ve watched kings rot in my gutters. Don\'t test my patience before the guards drag you out to the pillory."'
       }
     ],
     options: [
-      {
-         id: 'back',
-         text: '"I had another question..."',
-         nextStepId: 'start'
-      }
-    ]
-  },
-  tequila_sunset: {
-    id: 'tequila_sunset',
-    messages: [
-      {
-        speaker: 'IDIOT DOOM SPIRAL',
-        type: 'CHARACTER',
-        text: '"It\'s a cocktail, officer. And a philosophy. One part tragedy, two parts forgetting everything that happened before Tuesday. You\'re wearing it well."'
-      }
-    ],
-    options: [
-      {
-         id: 'back',
-         text: '"I see. I had another question..."',
-         nextStepId: 'start'
-      }
+      { id: 'back', text: '"Fine. We\'ll see."', nextStepId: 'start' }
     ]
   },
   leave: {
@@ -226,13 +213,13 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       {
         speaker: 'SYSTEM',
         type: 'SYSTEM',
-        text: 'You turn away. The smell of stale beer and regret follows you for a few steps before fading into the cold night air.'
+        text: 'You turn and walk back into the biting cold of the medieval night. The heavy curtain falls shut, muffled laughter and the clink of stone mugs fading behind you.'
       }
     ],
     options: [
       {
         id: 'restart',
-        text: '[Approach him again]',
+        text: '[Re-enter the Veil]',
         nextStepId: 'start'
       }
     ]

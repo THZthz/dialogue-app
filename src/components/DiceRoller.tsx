@@ -77,7 +77,7 @@ export const DiceRoller: React.FC<Props> = ({
           // Slight delay before completing to show final result
           setTimeout(() => {
             onComplete(totalWithBonus, totalWithBonus >= difficulty, finalDice);
-          }, 3200);
+          }, 900);
         }
       }, 100);
     }

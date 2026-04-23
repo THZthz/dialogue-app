@@ -91,7 +91,6 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
             </AnimatePresence>
           </div>
         )}
-        {!isSystem && <span className="text-gray-400 mr-2">–</span>}
       </div>
       <div className={`${isInnerVoice ? 'text-[#9081e3]' : 'text-gray-100'} mt-1`}>
         {renderText(message.text)}

@@ -11,42 +11,54 @@ import { DialogueOptions } from './components/DialogueOptions';
 import { TypingIndicator } from './components/TypingIndicator';
 import { DiceRoller } from './components/DiceRoller';
 import { CharacterPanel } from './components/CharacterPanel';
-import { motion, AnimatePresence } from 'motion/react';
+import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 
 import { aiService, AIResponse } from './services/LlmService';
 import { worldManager } from './services/WorldManager';
+import { FastForward, Trash2 } from 'lucide-react';
 
 export default function App() {
-  const [history, setHistory] = useState<Message[]>([]);
-  const [currentStepId, setCurrentStepId] = useState<string>('start');
+  const [history, setHistory] = useState<Message[]>(() => {
+    const saved = localStorage.getItem('elysian_history');
+    return saved ? JSON.parse(saved) : [];
+  });
+  const [currentStepId, setCurrentStepId] = useState<string>(() => {
+    return localStorage.getItem('elysian_currentStepId') || 'start';
+  });
   const [isTyping, setIsTyping] = useState(false);
   const [currentCheck, setCurrentCheck] = useState<DialogueOption['check'] | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<DialogueOption[] | null>(null);
+  const [isFastForward, setIsFastForward] = useState(false);
+  
+  const isFastForwardRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentStep = sampleDialogue[currentStepId];
 
+  // Save to localStorage
+  useEffect(() => {
+    localStorage.setItem('elysian_history', JSON.stringify(history));
+    localStorage.setItem('elysian_currentStepId', currentStepId);
+  }, [history, currentStepId]);
+
   // Helper to apply AI response
   const handleAIResponse = async (response: AIResponse) => {
     // 1. Update World
-    response.worldUpdates.forEach(update => {
+    response.worldUpdates?.forEach(update => {
       worldManager.updateEntity(update as any);
     });
 
     // 2. Display Messages
-    const aiMessages: Message[] = response.dialogue.map((m, i) => ({
+    const aiMessages: Message[] = response.messages.map((m, i) => ({
       ...m,
       id: `ai-${Date.now()}-${i}`
     }));
     await displayMessages(aiMessages);
 
     // 3. Set Options
-    const newOptions: DialogueOption[] = response.suggestedOptions.map(opt => ({
-      id: opt.id,
-      text: opt.text,
-      isAiTrigger: opt.isAiTrigger,
-      nextStepId: opt.nextStepId
+    const newOptions: DialogueOption[] = response.options.map(opt => ({
+      ...opt
     }));
     setDynamicOptions(newOptions);
   };
@@ -63,23 +75,44 @@ export default function App() {
   // Handle sequential message display
   const displayMessages = async (messages: Message[]) => {
     setIsTyping(true);
+    setIsFastForward(false);
+    isFastForwardRef.current = false;
     
     for (const msg of messages) {
-      // Calculate delay based on message length (min 1s, max 3s)
-      const delay = Math.min(Math.max(msg.text.length * 20, 1000), 3000);
-      
-      await new Promise(resolve => setTimeout(resolve, delay));
+      if (!isFastForwardRef.current) {
+        // Calculate delay based on message length (min 1s, max 3s)
+        const delay = Math.min(Math.max(msg.text.length * 20, 1000), 3000);
+        
+        // Wait in chunks to allow fast-forward to interrupt
+        const startTime = Date.now();
+        while (Date.now() - startTime < delay && !isFastForwardRef.current) {
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
+      } else {
+        await new Promise(resolve => setTimeout(resolve, 50)); // Still a tiny delay for rhythm
+      }
       setHistory(prev => [...prev, msg]);
     }
     
     setIsTyping(false);
+    setIsFastForward(false); // Reset after batch
+    isFastForwardRef.current = false;
+  };
+
+  const resetHistory = () => {
+    setHistory([]);
+    setCurrentStepId('start');
+    setDynamicOptions(null);
+    localStorage.removeItem('elysian_history');
+    localStorage.removeItem('elysian_currentStepId');
+    window.location.reload();
   };
 
   const initializedRef = useRef(false);
 
-  // Initialize with the first step's messages
+  // Initialize with the first step's messages ONLY if history is empty
   useEffect(() => {
-    if (currentStep && !initializedRef.current) {
+    if (currentStep && !initializedRef.current && history.length === 0) {
       initializedRef.current = true;
       const initialMessages = currentStep.messages.map((m, i) => ({
         ...m,
@@ -87,7 +120,7 @@ export default function App() {
       }));
       displayMessages(initialMessages);
     }
-  }, []);
+  }, [history.length]);
 
   const handleOptionSelect = async (option: DialogueOption) => {
     if (isTyping || currentCheck) return; // Prevent double selecting
@@ -195,6 +228,48 @@ export default function App() {
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white">
       <CharacterPanel />
+      
+      {/* Action Controls */}
+      <div className="fixed top-8 left-8 z-50 flex gap-3 items-center h-12">
+        <LayoutGroup>
+          <motion.button
+            onClick={resetHistory}
+            title="Reset Thought Stream"
+            whileHover={{ scale: 1.1, color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.5)' }}
+            whileTap={{ scale: 0.95 }}
+            className="h-11 w-11 flex-shrink-0 flex items-center justify-center bg-[#1a1a1a] border border-white/5 rounded-full shadow-lg z-10 text-gray-500"
+          >
+            <Trash2 size={18} />
+          </motion.button>
+          
+          <AnimatePresence>
+            {isTyping && (
+              <motion.button
+                key="fast-forward-button"
+                layout
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                exit={{ opacity: 0, scale: 0.8 }}
+                transition={{
+                  type: 'spring',
+                  stiffness: 500,
+                  damping: 45,
+                  mass: 0.5
+                }}
+                onClick={() => {
+                  isFastForwardRef.current = true;
+                  setIsFastForward(true);
+                }}
+                title="Fast Forward"
+                className="h-11 w-11 flex-shrink-0 flex items-center justify-center bg-[#1a1a1a] border border-[#ff6b35]/30 rounded-full text-[#ff6b35] hover:bg-[#ff6b35] hover:text-white transition-all duration-300 shadow-xl"
+              >
+                <FastForward size={18} />
+              </motion.button>
+            )}
+          </AnimatePresence>
+        </LayoutGroup>
+      </div>
+
       {/* Moody background overlay */}
       <div className="bg-texture" />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
