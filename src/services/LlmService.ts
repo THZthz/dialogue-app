@@ -39,20 +39,20 @@ const aiResponseSchema = z.object({
       skill: z.string(),
       difficulty: z.string(),
       success: z.boolean()
-    }).optional()
+    }).nullish()
   })),
   worldUpdates: z.array(z.object({
     id: z.string(),
-    longDescription: z.string().optional(),
-    shortDescription: z.string().optional(),
-    attributes: z.record(z.string(), z.string()).optional(),
-    opinions: z.record(z.string(), z.string()).optional()
+    longDescription: z.string().nullish(),
+    shortDescription: z.string().nullish(),
+    attributes: z.record(z.string(), z.string()).nullish(),
+    opinions: z.record(z.string(), z.string()).nullish()
   })),
   suggestedOptions: z.array(z.object({
     id: z.string(),
     text: z.string(),
     isAiTrigger: z.boolean(),
-    nextStepId: z.string().optional()
+    nextStepId: z.string().nullish()
   }))
 });
 
@@ -86,6 +86,8 @@ class AIService {
       6. Provide 3-4 suggested dialogue options for the user to continue. 
          - Set 'isAiTrigger' to TRUE for these options to continue the AI conversation loop.
          - If you want to return to a static part of the narrative (e.g., 'start', 'tequila_sunset', 'leave'), provide the corresponding 'nextStepId'.
+
+      CRITICAL: You MUST return a JSON object with exactly the keys "dialogue", "worldUpdates", and "suggestedOptions". If any are empty, return an empty array []. Use the exact spelling for speaker types: "YOU", "INNER_VOICE", "CHARACTER", "SYSTEM", "ROLL".
     `;
 
     try {
@@ -96,13 +98,17 @@ class AIService {
       const { object } = await generateObject({
         model: deepseek("deepseek-chat"),
         system: systemInstruction,
-        prompt: userInput,
+        prompt: `Objective: Provide a narrative response and suggested options for the user's input: "${userInput}". Ensure all fields are included in the JSON response even if empty.`,
         schema: aiResponseSchema,
       });
 
       return object as AIResponse;
     } catch (error) {
-      console.error("AI Generation Error:", error);
+      if (error instanceof Error) {
+        console.error("Detailed AI Error:", error.message);
+        // Log more info if available
+        if ('data' in error) console.error("Error Data:", (error as any).data);
+      }
       throw error;
     }
   }
