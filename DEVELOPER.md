@@ -54,6 +54,14 @@ A single line of text in the history.
 - **`type`**: `YOU`, `INNER_VOICE`, `CHARACTER`, `SYSTEM`, or `ROLL`. Determines styling.
 - **`skillCheck`**: Visual hint attached to a message indicating it was the result of a check.
 
+### Object Reference System
+Dialogue messages support interactive object links using a custom markdown-like syntax:
+`[Object Name](#object_id)`
+
+- **ObjectRegistry (`src/services/ObjectManager.ts`)**: Central storage for all world objects.
+- **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
+- **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
+
 ---
 
 ## 4. Key Systems

@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Message } from '../types/dialogue';
 import { motion, AnimatePresence } from 'motion/react';
 import { DieFace } from './DiceRoller';
+import { ObjectLink } from './ObjectLink';
 
 interface Props {
   message: Message;
@@ -20,12 +21,28 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
   };
 
   const renderText = (text: string) => {
-    // Basic Markdown-ish italics: *text* -> <em>text</em>
-    const parts = text.split(/(\*.*?\*)/g);
+    // 1. Split for italics: *text*
+    // 2. Split for object links: [display](#id)
+    // We combine these into a robust parsing strategy
+    
+    // First, identify all special patterns and split the text
+    // Regex matches either *italic* or [object](#id)
+    const pattern = /(\*.*?\*|\[.*?\]\(#.*?\))/g;
+    const parts = text.split(pattern);
+
     return parts.map((part, i) => {
+      // Handle Italics
       if (part.startsWith('*') && part.endsWith('*')) {
-        return <em key={i} className="italic">{part.slice(1, -1)}</em>;
+        return <em key={i} className="italic opacity-90">{part.slice(1, -1)}</em>;
       }
+      
+      // Handle Object Links: [name](#id)
+      const objMatch = part.match(/\[(.*?)\]\(#(.*?)\)/);
+      if (objMatch) {
+        const [, displayName, objectId] = objMatch;
+        return <ObjectLink key={i} displayName={displayName} objectId={objectId} />;
+      }
+      
       return part;
     });
   };

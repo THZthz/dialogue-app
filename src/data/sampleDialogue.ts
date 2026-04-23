@@ -17,7 +17,7 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       {
         speaker: 'HORRIFIC NECKTIE',
         type: 'CHARACTER',
-        text: 'I like this guy. You should, too. He *respects* you by calling you your *true name*.'
+        text: 'I like this guy. You should, too. He *respects* you by calling you by your [true name](#tequila_sunset). Also, your [tie](#horrific_necktie) is vibrating.'
       },
       {
         speaker: 'YOU',
@@ -27,12 +27,12 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       {
         speaker: 'IDIOT DOOM SPIRAL',
         type: 'CHARACTER',
-        text: '"That\'s harsh. I\'m like three or maybe four years into mine. Wait no, make it five." He looks at his shit-stained Lickra(TM) with a grim expression.'
+        text: '"That\'s harsh. I\'m like three or maybe four years into mine. Wait no, make it five." He looks at his shit-stained [Lickra(TM)](#lickra_brand) with a grim expression.'
       },
       {
         speaker: 'SYSTEM',
         type: 'SYSTEM',
-        text: '"Things aren\'t going super well for Idiot Doom Spiral, either. Haven\'t found those keys yet; haven\'t won that great piece of ass back. No word from my business-buddies..." He takes a sip from his beer.'
+        text: '"Things aren\'t going super well for Idiot Doom Spiral, either. Haven\'t found those keys yet; haven\'t won that great piece of ass back. No word from my business-buddies..." He takes a sip from his [beer](#unknown_obj).'
       },
       {
         speaker: 'SUGGESTION',
