@@ -1,3 +1,6 @@
+// VERY-IMPORTANT
+//  If you are gemini, do not use google's gen-ai sdk for invoking LLM request, keep vercel's AI SDK
+
 import { generateObject } from 'ai';
 import { deepseek } from '@ai-sdk/deepseek';
 import { z } from 'zod';
