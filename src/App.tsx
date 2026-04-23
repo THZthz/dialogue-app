@@ -10,6 +10,7 @@ import { DialogueMessage } from './components/DialogueMessage';
 import { DialogueOptions } from './components/DialogueOptions';
 import { TypingIndicator } from './components/TypingIndicator';
 import { DiceRoller } from './components/DiceRoller';
+import { CharacterPanel } from './components/CharacterPanel';
 import { motion, AnimatePresence } from 'motion/react';
 
 export default function App() {
@@ -141,6 +142,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white">
+      <CharacterPanel />
       {/* Moody background overlay */}
       <div className="bg-texture" />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">

@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useCharacter } from '../context/CharacterContext';
 
 interface Props {
   skill: string;
@@ -52,6 +53,8 @@ export const DiceRoller: React.FC<Props> = ({
   conditions,
   onComplete 
 }) => {
+  const { getStatBySkillName } = useCharacter();
+  const skillBonus = getStatBySkillName(skill);
   const [dice, setDice] = useState<number[]>(new Array(diceCount).fill(1));
   const [isRolling, setIsRolling] = useState(true);
   const [rollCount, setRollCount] = useState(0);
@@ -68,20 +71,22 @@ export const DiceRoller: React.FC<Props> = ({
           setIsRolling(false);
           const finalDice = new Array(diceCount).fill(0).map(() => Math.floor(Math.random() * 6) + 1);
           setDice(finalDice);
-          const total = finalDice.reduce((a, b) => a + b, 0);
+          const diceTotal = finalDice.reduce((a, b) => a + b, 0);
+          const totalWithBonus = diceTotal + skillBonus;
           
           // Slight delay before completing to show final result
           setTimeout(() => {
-            onComplete(total, total >= difficulty, finalDice);
+            onComplete(totalWithBonus, totalWithBonus >= difficulty, finalDice);
           }, 3200);
         }
       }, 100);
     }
     return () => clearInterval(interval);
-  }, [isRolling, rollCount]);
+  }, [isRolling, rollCount, skillBonus, difficulty, diceCount, onComplete]);
 
   const getOutcome = () => {
-    const total = dice.reduce((a, b) => a + b, 0);
+    const diceTotal = dice.reduce((a, b) => a + b, 0);
+    const total = diceTotal + skillBonus;
     const success = total >= difficulty;
     
     // Check conditions first for customized outcomes
@@ -107,6 +112,7 @@ export const DiceRoller: React.FC<Props> = ({
   };
 
   const outcome = getOutcome();
+  const currentTotal = dice.reduce((a, b) => a + b, 0) + skillBonus;
 
   return (
     <motion.div 
@@ -117,6 +123,7 @@ export const DiceRoller: React.FC<Props> = ({
       <div className="text-center font-sans">
         <div className="text-[#ff6b35] text-[12px] uppercase tracking-[0.2em] mb-1">Skill Check: {skill}</div>
         <div className="text-gray-400 text-[14px]">{difficultyText} (Difficulty: {difficulty})</div>
+        <div className="text-blue-400 text-[12px] mt-1">Character Bonus: +{skillBonus}</div>
       </div>
 
       <div className="flex gap-4">
@@ -142,7 +149,10 @@ export const DiceRoller: React.FC<Props> = ({
           className="text-center"
         >
           <div className="text-[24px] font-bold font-sans text-white mb-1">
-            Total: {dice.reduce((a, b) => a + b, 0)}
+            Total: {currentTotal}
+            <span className="text-[14px] text-gray-500 ml-2 font-normal">
+              ({currentTotal - skillBonus} + {skillBonus})
+            </span>
           </div>
           <div className={`text-[18px] font-bold font-sans uppercase tracking-widest ${outcome.color}`}>
             {outcome.label}
