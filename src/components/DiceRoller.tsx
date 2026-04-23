@@ -142,151 +142,199 @@ export const DiceRoller: React.FC<Props> = ({
   const diceTotal = dice.reduce((a, b) => a + b, 0);
   const currentTotal = diceTotal + skillBonus;
 
+  // Unified Box Container
+  const RollerBox = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95 }}
+      animate={{ opacity: 1, scale: 1 }}
+      className="my-12 relative flex justify-center"
+    >
+      <div 
+        className={`w-80 bg-[#050505] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden rounded-sm relative transition-all duration-500 ${onClick ? 'cursor-pointer group hover:border-white/20' : ''}`}
+        onClick={onClick}
+      >
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+        
+        {/* Header bar */}
+        <div className={`px-4 py-2 text-white font-sans font-bold uppercase tracking-[0.2em] text-center text-[11px] transition-colors duration-500 ${isRolling ? 'bg-[#4fb0c6]' : hasRolled ? (outcome.isSuccess ? 'bg-[#2d5a27]' : 'bg-[#5a2727]') : 'bg-[#1a1a1a]'}`}>
+          {skill} Check {hasRolled ? (outcome.isSuccess ? 'Passed' : 'Failed') : ''}
+        </div>
+
+        <div className="p-8 flex flex-col items-center text-center relative z-10 min-h-[340px] justify-center">
+          {children}
+        </div>
+
+        {/* Prompt overlay */}
+        {!isRolling && !hasRolled && onClick && (
+          <div className="absolute inset-x-0 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pointer-events-none">
+            <div className="text-white text-[9px] font-bold tracking-[0.3em] uppercase opacity-40">Click to Proceed</div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+
+  // 1. Red Check Idle
   if (isRed && !isRolling && !hasRolled) {
     return (
-      <motion.div 
-        initial={{ opacity: 0, scale: 0.9 }}
-        animate={{ opacity: 1, scale: 1 }}
-        className="my-12 relative flex justify-center"
-      >
-        <div className="w-80 bg-[#151515] border border-white/10 shadow-2xl overflow-hidden rounded-sm relative group cursor-pointer" onClick={() => setIsRolling(true)}>
-           {/* Top bar */}
-           <div className="bg-[#4fb0c6] px-4 py-2 text-white font-sans font-bold uppercase tracking-[0.2em] text-center text-[14px]">
-             {skill}: {skillBonus}
+      <RollerBox onClick={() => setIsRolling(true)}>
+        <div className="text-[#ff4d4d] text-[18px] uppercase tracking-[0.4em] font-black mb-2 drop-shadow-[0_0_8px_rgba(255,77,77,0.3)]">RED CHECK</div>
+        <div className="text-[64px] font-bold text-white leading-none mb-4 tracking-tighter">{probability}%</div>
+        
+        <div className="w-16 h-[1px] bg-white/10 mb-6" />
+        
+        <div className="text-gray-400 text-[12px] font-serif italic mb-8 max-w-[220px] leading-relaxed">
+           This action is irreversible. Failure will be absolute.
+        </div>
+        
+        <div className="flex justify-between w-full mt-4 opacity-30 px-6">
+           <div className="flex flex-col items-center gap-2">
+              <div className="flex gap-1">
+                 <div className="w-4 h-4 bg-white/10 rounded-sm flex items-center justify-center">
+                   <DieFace value={1} size="xs" />
+                 </div>
+                 <div className="w-4 h-4 bg-white/10 rounded-sm flex items-center justify-center">
+                   <DieFace value={1} size="xs" />
+                 </div>
+              </div>
+              <span className="text-[6px] uppercase tracking-widest">Natural 2</span>
            </div>
            
-           <div className="p-8 flex flex-col items-center text-center">
-             <div className="text-[#ff4d4d] text-[20px] uppercase tracking-widest font-black mb-2">LOW</div>
-             <div className="text-[64px] font-bold text-white leading-none mb-4">{probability}%</div>
-             
-             <div className="w-full h-[1px] bg-white/10 mb-6" />
-             
-             <div className="text-gray-400 text-[12px] font-serif italic mb-8 max-w-[200px]">
-                This is a Red Check. It can not be retried.
-             </div>
-             
-             <div className="flex justify-between w-full opacity-40">
-                <div className="flex flex-col items-center gap-1">
-                   <div className="flex gap-1">
-                      <div className="w-5 h-5 bg-white/10 rounded-sm flex items-center justify-center">
-                        <DieFace value={1} size="xs" />
-                      </div>
-                      <div className="w-5 h-5 bg-white/10 rounded-sm flex items-center justify-center">
-                        <DieFace value={1} size="xs" />
-                      </div>
-                   </div>
-                   <span className="text-[8px] uppercase">Always Loses</span>
-                </div>
-                
-                <div className="flex flex-col items-center gap-1">
-                   <div className="flex gap-1">
-                      <div className="w-5 h-5 bg-white/10 rounded-sm flex items-center justify-center">
-                        <DieFace value={6} size="xs" />
-                      </div>
-                      <div className="w-5 h-5 bg-white/10 rounded-sm flex items-center justify-center">
-                        <DieFace value={6} size="xs" />
-                      </div>
-                   </div>
-                   <span className="text-[8px] uppercase">Always Wins</span>
-                </div>
-             </div>
-           </div>
-           
-           {/* Pulsing prompt */}
-           <div className="absolute inset-0 bg-white/5 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-             <div className="text-white text-[12px] font-bold tracking-widest uppercase">Click to Enforce</div>
+           <div className="flex flex-col items-center gap-2">
+              <div className="flex gap-1">
+                 <div className="w-4 h-4 bg-white/10 rounded-sm flex items-center justify-center">
+                   <DieFace value={6} size="xs" />
+                 </div>
+                 <div className="w-4 h-4 bg-white/10 rounded-sm flex items-center justify-center">
+                   <DieFace value={6} size="xs" />
+                 </div>
+              </div>
+              <span className="text-[6px] uppercase tracking-widest">Natural 12</span>
            </div>
         </div>
-      </motion.div>
+      </RollerBox>
     );
   }
 
-  return (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.9 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="my-12 flex flex-col items-center"
-    >
-      {!hasRolled && !isRolling && !isRed && (
-        <button 
-          onClick={() => setIsRolling(true)}
-          className="mb-4 px-8 py-4 bg-[#1a1a1a] border border-white/10 text-elysian-orange font-bold uppercase tracking-widest hover:bg-[#222] transition-all"
-        >
-          Check {skill} ({probability}%)
-        </button>
-      )}
+  // 2. Standard Check Idle
+  if (!isRolling && !hasRolled) {
+    return (
+      <RollerBox onClick={() => setIsRolling(true)}>
+        <div className="text-[#4fb0c6] text-[13px] uppercase tracking-[0.4em] font-bold mb-4 opacity-70">Probability</div>
+        <div className="text-[72px] font-bold text-white leading-none mb-2 tracking-tighter">{probability}%</div>
+        
+        <div className="w-full max-w-[160px] h-1 bg-white/5 rounded-full overflow-hidden mb-8 mt-2">
+           <motion.div 
+             initial={{ width: 0 }}
+             animate={{ width: `${probability}%` }}
+             className="h-full bg-[#4fb0c6]"
+           />
+        </div>
 
-      {isRolling && (
-        <div className="flex gap-6 mb-8">
+        <div className="flex gap-4 items-center text-[12px] font-serif italic text-gray-400">
+           <span>Stat: +{skillBonus}</span>
+           <span className="w-1 h-1 rounded-full bg-white/20" />
+           <span>Diff: {difficulty}</span>
+        </div>
+      </RollerBox>
+    );
+  }
+
+  // 3. Rolling
+  if (isRolling) {
+    return (
+      <RollerBox>
+        <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[100px] font-black text-white/[0.02] select-none pointer-events-none tracking-tighter">
+          ACTIVE
+        </div>
+        
+        <div className="flex gap-6 mb-8 relative z-20">
           {dice.map((value, i) => (
             <motion.div
               key={i}
               animate={{
                 rotate: [0, 90, 180, 270, 360],
                 scale: [1, 1.1, 1],
-                y: [0, -5, 0]
+                y: [0, -10, 0]
               }}
-              transition={{ duration: 0.15, repeat: Infinity }}
-              className="w-16 h-16 bg-[#222] border-2 border-white/20 rounded-md shadow-lg flex items-center justify-center"
+              transition={{ duration: 0.12, repeat: Infinity }}
+              className="w-16 h-16 bg-[#111] border border-white/20 rounded shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center"
             >
               <DieFace value={value} size="md" />
             </motion.div>
           ))}
         </div>
-      )}
 
-      {hasRolled && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.8, y: 20 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          className="relative"
-        >
-          {/* Backdrop blur effect */}
-          <div className="absolute -inset-4 bg-black/40 blur-xl rounded-full" />
-          
-          <div className="relative w-80 bg-black border border-white/5 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden rounded-sm">
-            {/* Texture overlay */}
-            <div className="absolute inset-0 opacity-10 pointer-events-none bg-[url('https://www.transparenttextures.com/patterns/dark-matter.png')]" />
-            
-            <div className="p-8 flex flex-col items-center text-center relative z-10">
-              <motion.div 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.2 }}
-                className={`text-[28px] font-black uppercase tracking-[0.3em] mb-6 ${outcome.color}`}
-              >
-                {outcome.label}
-              </motion.div>
-              
-              <div className="w-full h-[1px] bg-white/20 mb-6" />
-              
-              <div className="space-y-4 font-serif">
-                <div className="text-gray-400 text-[18px]">
-                  {difficultyText}: <span className="text-white font-sans font-bold ml-2">{difficulty}</span>
-                </div>
-                
-                <div className="text-gray-500 text-[14px] italic">vs</div>
-                
-                <div className="text-gray-400 text-[18px]">
-                  Your Total: <span className="text-white font-sans font-bold ml-2">{currentTotal}</span>
-                </div>
-              </div>
+        <div className="mt-4 flex flex-col items-center">
+           <div className="text-[10px] font-black text-[#4fb0c6] tracking-[0.4em] uppercase mb-2">Calculating Outcome</div>
+           <div className="flex gap-1.5 h-1">
+              {[...Array(5)].map((_, i) => (
+                <motion.div
+                  key={i}
+                  animate={{ 
+                    opacity: [0.1, 1, 0.1],
+                    scaleY: [1, 2, 1]
+                  }}
+                  transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.1 }}
+                  className="w-1 h-full bg-[#4fb0c6]"
+                />
+              ))}
+           </div>
+        </div>
+      </RollerBox>
+    );
+  }
 
-              {/* Reveal the final dice at the bottom */}
-              <div className="mt-8 flex gap-2">
-                 {dice.map((v, i) => (
-                   <div key={i} className="w-8 h-8 rounded border border-white/10 bg-white/5 flex items-center justify-center opacity-50">
-                     <DieFace value={v} size="sm" />
-                   </div>
-                 ))}
-                 <div className="w-8 h-8 rounded border border-white/10 bg-white/5 flex items-center justify-center font-bold text-[14px] text-[#4fb0c6] opacity-50">
-                   +{skillBonus}
-                 </div>
+  // 4. Result
+  return (
+    <RollerBox>
+      <motion.div 
+        initial={{ opacity: 0, scale: 0.8 }}
+        animate={{ opacity: 1, scale: 1 }}
+        className={`text-[36px] font-black uppercase tracking-[0.3em] mb-6 drop-shadow-2xl ${outcome.color}`}
+      >
+        {outcome.label}
+      </motion.div>
+      
+      <div className="w-full h-[1px] bg-white/10 mb-8" />
+      
+      <div className="space-y-6 font-serif w-full max-w-[200px]">
+        <div className="flex justify-between items-center text-[15px]">
+          <span className="text-gray-500 italic uppercase text-[10px] tracking-widest">Difficulty</span>
+          <span className="text-white font-sans font-bold">{difficulty}</span>
+        </div>
+        
+        <div className="relative h-[1px] flex items-center justify-center">
+           <div className="w-full h-[1px] bg-white/10" />
+           <div className="bg-[#050505] px-3 text-[10px] italic text-gray-600 relative z-10 uppercase tracking-tighter">Versus</div>
+        </div>
+        
+        <div className="flex justify-between items-center text-[15px]">
+          <span className="text-gray-500 italic uppercase text-[10px] tracking-widest">Your Total</span>
+          <span className="text-white font-sans font-bold">{currentTotal}</span>
+        </div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.3 }}
+        className="mt-10 flex items-center gap-4 bg-white/[0.02] p-4 rounded-sm border border-white/5"
+      >
+         <div className="flex gap-2.5">
+            {dice.map((v, i) => (
+              <div key={i} className="w-10 h-10 rounded border border-white/10 bg-black/50 flex items-center justify-center shadow-inner">
+                <DieFace value={v} size="sm" />
               </div>
-            </div>
-          </div>
-        </motion.div>
-      )}
-    </motion.div>
+            ))}
+         </div>
+         <div className="h-8 w-[1px] bg-white/10" />
+         <div className="flex flex-col items-center">
+           <span className="text-[20px] font-black text-[#4fb0c6]">+{skillBonus}</span>
+           <span className="text-[8px] text-gray-600 uppercase tracking-widest font-sans">Stat</span>
+         </div>
+      </motion.div>
+    </RollerBox>
   );
 };

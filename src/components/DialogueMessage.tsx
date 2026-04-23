@@ -69,7 +69,7 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
             onMouseLeave={() => setIsTooltipVisible(false)}
           >
             <span className="text-white/40 text-[14px] mr-2 uppercase cursor-help hover:text-white/80 transition-colors">
-              [{message.skillCheck.difficulty}: <span className={message.skillCheck.success ? 'text-[#9eff9e]' : 'text-[#ff6b6b]'}>{message.skillCheck.success ? 'Success' : 'Failure'}</span>] –
+              [{message.skillCheck.difficulty}: <span className={message.skillCheck.success ? 'text-[#9eff9e]' : 'text-[#ff6b6b]'}>{message.skillCheck.success ? 'Success' : 'Failure'}</span>]
             </span>
             
             <AnimatePresence>

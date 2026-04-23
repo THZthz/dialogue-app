@@ -69,7 +69,7 @@ export const DialogueOptions: React.FC<Props> = ({ options, onSelect }) => {
             }`}
           >
             <div className="flex gap-2 items-start">
-              <span className={`${isRedCheck ? 'text-white' : 'opacity-70'} whitespace-nowrap`}>{index + 1}. -</span>
+              <span className={`${isRedCheck ? 'text-white' : 'opacity-70'} whitespace-nowrap`}>{index + 1}.</span>
               <span className={`flex-1 ${!isRedCheck && 'group-hover:underline underline-offset-4 decoration-1 decoration-[#ff6b35]/40 text-pretty'}`}>
                 {skillCheckHint && (
                   <span className="font-bold mr-1">{skillCheckHint}</span>
