@@ -331,12 +331,14 @@ export default function App() {
             {history.map((msg) => (
               <DialogueMessage key={msg.id} message={msg} />
             ))}
-            {currentCheck && (
-              <DiceRoller 
-                {...currentCheck} 
-                onComplete={handleRollComplete} 
-              />
-            )}
+            <AnimatePresence>
+              {currentCheck && (
+                <DiceRoller 
+                  {...currentCheck} 
+                  onComplete={handleRollComplete} 
+                />
+              )}
+            </AnimatePresence>
             {isTyping && <TypingIndicator />}
             <div ref={messagesEndRef} className="h-4" />
           </div>

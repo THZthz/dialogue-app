@@ -67,6 +67,60 @@ export const DieFace: React.FC<{ value: number; size?: 'sm' | 'md' | 'lg' | 'xs'
   );
 };
 
+// Unified Box Container
+const RollerBox = ({ 
+  children, 
+  onClick, 
+  isRolling, 
+  hasRolled, 
+  outcome, 
+  skill 
+}: { 
+  children: React.ReactNode; 
+  onClick?: () => void;
+  isRolling: boolean;
+  hasRolled: boolean;
+  outcome: { label: string; color: string; isSuccess: boolean };
+  skill: string;
+}) => (
+  <motion.div 
+    initial={{ opacity: 0 }}
+    animate={{ opacity: 1 }}
+    exit={{ opacity: 0 }}
+    className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+  >
+    <motion.div 
+      initial={{ opacity: 0, scale: 0.95, y: 20 }}
+      animate={{ opacity: 1, scale: 1, y: 0 }}
+      className="relative"
+    >
+      <div 
+        className={`w-80 bg-[#050505] border border-white/10 shadow-[0_0_100px_rgba(0,0,0,1)] overflow-hidden rounded-sm relative transition-all duration-500 ${onClick ? 'cursor-pointer group hover:border-white/20' : ''}`}
+        onClick={onClick}
+      >
+        {/* Subtle grid pattern */}
+        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
+        
+        {/* Header bar */}
+        <div className={`px-4 py-2 text-white font-sans font-bold uppercase tracking-[0.2em] text-center text-[11px] transition-colors duration-500 ${isRolling ? 'bg-[#4fb0c6]' : hasRolled ? (outcome.isSuccess ? 'bg-[#2d5a27]' : 'bg-[#5a2727]') : 'bg-[#1a1a1a]'}`}>
+          {skill} Check {hasRolled ? (outcome.isSuccess ? 'Passed' : 'Failed') : ''}
+        </div>
+
+        <div className="p-8 flex flex-col items-center text-center relative z-10 min-h-[340px] justify-center">
+          {children}
+        </div>
+
+        {/* Prompt overlay */}
+        {!isRolling && !hasRolled && onClick && (
+          <div className="absolute inset-x-0 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pointer-events-none">
+            <div className="text-white text-[9px] font-bold tracking-[0.3em] uppercase opacity-40">Click to Proceed</div>
+          </div>
+        )}
+      </div>
+    </motion.div>
+  </motion.div>
+);
+
 export const DiceRoller: React.FC<Props> = ({ 
   skill, 
   difficulty, 
@@ -92,8 +146,9 @@ export const DiceRoller: React.FC<Props> = ({
         setDice(prev => prev.map(() => Math.floor(Math.random() * 6) + 1));
         setRollCount(c => c + 1);
         
-        // Stop rolling after ~1.5 seconds
-        if (rollCount > 15) {
+        // Stop rolling after ~2.8 seconds (7 * 400ms)
+        // This makes the rolls feel discrete and rhythmic
+        if (rollCount > 6) {
           setIsRolling(false);
           setHasRolled(true);
           const finalDice = new Array(diceCount).fill(0).map(() => Math.floor(Math.random() * 6) + 1);
@@ -101,12 +156,12 @@ export const DiceRoller: React.FC<Props> = ({
           const diceTotal = finalDice.reduce((a, b) => a + b, 0);
           const totalWithBonus = diceTotal + skillBonus;
           
-          // Slight delay before completing to show final result
+          // Delay before completing to show final result
           setTimeout(() => {
             onComplete(totalWithBonus, totalWithBonus >= difficulty, finalDice);
-          }, 2000);
+          }, 1500);
         }
-      }, 80);
+      }, 400);
     }
     return () => clearInterval(interval);
   }, [isRolling, rollCount, skillBonus, difficulty, diceCount, onComplete]);
@@ -142,43 +197,12 @@ export const DiceRoller: React.FC<Props> = ({
   const diceTotal = dice.reduce((a, b) => a + b, 0);
   const currentTotal = diceTotal + skillBonus;
 
-  // Unified Box Container
-  const RollerBox = ({ children, onClick }: { children: React.ReactNode; onClick?: () => void }) => (
-    <motion.div 
-      initial={{ opacity: 0, scale: 0.95 }}
-      animate={{ opacity: 1, scale: 1 }}
-      className="my-12 relative flex justify-center"
-    >
-      <div 
-        className={`w-80 bg-[#050505] border border-white/10 shadow-[0_0_50px_rgba(0,0,0,0.8)] overflow-hidden rounded-sm relative transition-all duration-500 ${onClick ? 'cursor-pointer group hover:border-white/20' : ''}`}
-        onClick={onClick}
-      >
-        {/* Subtle grid pattern */}
-        <div className="absolute inset-0 opacity-[0.03] pointer-events-none bg-[radial-gradient(#fff_1px,transparent_1px)] [background-size:16px_16px]" />
-        
-        {/* Header bar */}
-        <div className={`px-4 py-2 text-white font-sans font-bold uppercase tracking-[0.2em] text-center text-[11px] transition-colors duration-500 ${isRolling ? 'bg-[#4fb0c6]' : hasRolled ? (outcome.isSuccess ? 'bg-[#2d5a27]' : 'bg-[#5a2727]') : 'bg-[#1a1a1a]'}`}>
-          {skill} Check {hasRolled ? (outcome.isSuccess ? 'Passed' : 'Failed') : ''}
-        </div>
-
-        <div className="p-8 flex flex-col items-center text-center relative z-10 min-h-[340px] justify-center">
-          {children}
-        </div>
-
-        {/* Prompt overlay */}
-        {!isRolling && !hasRolled && onClick && (
-          <div className="absolute inset-x-0 bottom-4 opacity-0 group-hover:opacity-100 transition-opacity flex justify-center pointer-events-none">
-            <div className="text-white text-[9px] font-bold tracking-[0.3em] uppercase opacity-40">Click to Proceed</div>
-          </div>
-        )}
-      </div>
-    </motion.div>
-  );
+  const rollerProps = { isRolling, hasRolled, outcome, skill };
 
   // 1. Red Check Idle
   if (isRed && !isRolling && !hasRolled) {
     return (
-      <RollerBox onClick={() => setIsRolling(true)}>
+      <RollerBox {...rollerProps} onClick={() => setIsRolling(true)}>
         <div className="text-[#ff4d4d] text-[18px] uppercase tracking-[0.4em] font-black mb-2 drop-shadow-[0_0_8px_rgba(255,77,77,0.3)]">RED CHECK</div>
         <div className="text-[64px] font-bold text-white leading-none mb-4 tracking-tighter">{probability}%</div>
         
@@ -220,7 +244,7 @@ export const DiceRoller: React.FC<Props> = ({
   // 2. Standard Check Idle
   if (!isRolling && !hasRolled) {
     return (
-      <RollerBox onClick={() => setIsRolling(true)}>
+      <RollerBox {...rollerProps} onClick={() => setIsRolling(true)}>
         <div className="text-[#4fb0c6] text-[13px] uppercase tracking-[0.4em] font-bold mb-4 opacity-70">Probability</div>
         <div className="text-[72px] font-bold text-white leading-none mb-2 tracking-tighter">{probability}%</div>
         
@@ -244,7 +268,7 @@ export const DiceRoller: React.FC<Props> = ({
   // 3. Rolling
   if (isRolling) {
     return (
-      <RollerBox>
+      <RollerBox {...rollerProps}>
         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 text-[100px] font-black text-white/[0.02] select-none pointer-events-none tracking-tighter">
           ACTIVE
         </div>
@@ -258,7 +282,7 @@ export const DiceRoller: React.FC<Props> = ({
                 scale: [1, 1.1, 1],
                 y: [0, -10, 0]
               }}
-              transition={{ duration: 0.12, repeat: Infinity }}
+              transition={{ duration: 0.4, repeat: Infinity, ease: "linear" }}
               className="w-16 h-16 bg-[#111] border border-white/20 rounded shadow-[0_0_30px_rgba(255,255,255,0.05)] flex items-center justify-center"
             >
               <DieFace value={value} size="md" />
@@ -288,7 +312,7 @@ export const DiceRoller: React.FC<Props> = ({
 
   // 4. Result
   return (
-    <RollerBox>
+    <RollerBox {...rollerProps}>
       <motion.div 
         initial={{ opacity: 0, scale: 0.8 }}
         animate={{ opacity: 1, scale: 1 }}
