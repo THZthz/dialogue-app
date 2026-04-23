@@ -109,7 +109,80 @@ export const sampleDialogue: Record<string, DialogueStep> = {
         id: 'opt_leave',
         text: '"I\'ve seen enough. Farewell."',
         nextStepId: 'leave'
+      },
+      {
+        id: 'opt_demo',
+        text: '[Demo: Show me high-stakes UI and notifications.]',
+        nextStepId: 'red_check_demo'
       }
+    ]
+  },
+  red_check_demo: {
+    id: 'red_check_demo',
+    messages: [
+      {
+        speaker: 'LOGIC',
+        type: 'INNER_VOICE',
+        text: 'This is a demonstration of the new visual systems. Observe the notifications following this message.'
+      },
+      {
+        speaker: 'SYSTEM',
+        type: 'NOTIFICATION',
+        text: '+5 XP: gained experience.'
+      },
+      {
+        speaker: 'SYSTEM',
+        type: 'NOTIFICATION',
+        text: 'New task: Interview cafeteria manager'
+      },
+      {
+        speaker: 'SYSTEM',
+        type: 'NOTIFICATION',
+        text: 'Item gained: Horrific Necktie'
+      }
+    ],
+    options: [
+      {
+        id: 'opt_red_check',
+        text: 'Try to invent a name for yourself.',
+        check: {
+          skill: 'Conceptualization',
+          difficulty: 11,
+          difficultyText: 'Medium',
+          diceCount: 2,
+          isRed: true,
+          conditions: [
+            { expression: "success", stepId: 'red_success', label: 'Success' },
+            { expression: "true", stepId: 'red_fail', label: 'Failure' }
+          ]
+        }
+      }
+    ]
+  },
+  red_success: {
+    id: 'red_success',
+    messages: [
+      {
+        speaker: 'CONCEPTUALIZATION',
+        type: 'INNER_VOICE',
+        text: 'You are... *Raphaël Ambrosius Costeau*. Yes. That sounds like a name for an officer of the law. Or a very confused disco dancer.'
+      }
+    ],
+    options: [
+      { id: 'cont', text: 'CONTINUE', isContinue: true, nextStepId: 'start' }
+    ]
+  },
+  red_fail: {
+    id: 'red_fail',
+    messages: [
+      {
+        speaker: 'CONCEPTUALIZATION',
+        type: 'INNER_VOICE',
+        text: 'Nothing. Your mind is a blank slate of gray static. You are just... a person. A person without a name.'
+      }
+    ],
+    options: [
+      { id: 'cont', text: 'CONTINUE', isContinue: true, nextStepId: 'start' }
     ]
   },
   charm_success: {

@@ -126,3 +126,25 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 - **Type Safety**: Integrated **Zod** in `LlmService.ts` for automated schema validation of AI responses.
 - **UI Polish**: Applied global scrollbar hiding in `index.css` to enhance cinematic immersion while preserving scroll functionality.
 - **Instruction Refinement**: Hardened the system prompt and Zod schema to prevent "response did not match schema" errors (using `.nullish()` and objective-oriented prompting).
+
+---
+
+## 8. Visual & Narrative Roadmap
+
+The following features were identified as missing based on target visual references and are queued for implementation:
+
+### 1. Narrative & Interaction Polish
+- [ ] **Continue Button:** Cinematic large pink/red "CONTINUE" button for dialogue flow instead of standard numbered options.
+- [ ] **Notification Messages:** Specialized styling for `XP_GAIN`, `TASK_UPDATE`, and `ITEM_GAIN` (muted green text, distinct spacing).
+- [ ] **Scroll Indicator:** Vertical line with circle markers indicating dialogue progression.
+
+### 2. Skill Check Enhancements
+- [ ] **Red Checks:** Specialized high-stakes UI for non-repeatable checks with probability percentages.
+- [ ] **Result Overlays:** Painterly "SUCCEEDED/FAILED" result cards with textured backgrounds.
+- [ ] **Probability Preview:** Calculated chance of success shown on options before committing.
+
+### 3. Atmospheric Effects
+- [ ] **Side Text:** Vertical character/state indicators on screen edges.
+- [ ] **Dynamic Backgrounds:** Support for scene-specific isometric backgrounds.
+
+---

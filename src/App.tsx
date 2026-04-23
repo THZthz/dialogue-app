@@ -125,20 +125,24 @@ export default function App() {
   const handleOptionSelect = async (option: DialogueOption) => {
     if (isTyping || currentCheck) return; // Prevent double selecting
 
-    // 1. Add "YOU" message immediately
-    // Strip skill hints like [Logic: Medium] but keep action tags like [Leave] if they aren't skill checks
+    let updatedHistory = history;
     const cleanText = option.text.replace(/^\[[^\]]*?:[^\]]*?\]\s*/, '');
-    
-    const youMessage: Message = {
-      id: `you-${Date.now()}`,
-      speaker: 'YOU',
-      type: 'YOU',
-      text: cleanText
-    };
-    
-    // Calculate updated history immediately to pass to AI
-    const updatedHistory = [...history, youMessage];
-    setHistory(updatedHistory);
+
+    if (!option.isContinue) {
+      // 1. Add "YOU" message immediately
+      // Strip skill hints like [Logic: Medium] but keep action tags like [Leave] if they aren't skill checks
+      
+      const youMessage: Message = {
+        id: `you-${Date.now()}`,
+        speaker: 'YOU',
+        type: 'YOU',
+        text: cleanText
+      };
+      
+      // Calculate updated history immediately to pass to AI
+      updatedHistory = [...history, youMessage];
+      setHistory(updatedHistory);
+    }
 
     // 2. Handle Skill Check, Normal transition, or AI Trigger
     if (option.check) {
@@ -182,6 +186,7 @@ export default function App() {
     if (!currentCheck) return;
     
     let outcomeStepId: string | null = null;
+    const skillBonus = total - dice.reduce((a, b) => a + b, 0);
 
     // Evaluate conditions to find the first matching path
     for (const condition of currentCheck.conditions) {
@@ -208,7 +213,8 @@ export default function App() {
       total,
       success,
       difficulty: currentCheck.difficulty,
-      skill: currentCheck.skill
+      skill: currentCheck.skill,
+      skillBonus
     };
 
     setCurrentCheck(null);
@@ -229,6 +235,30 @@ export default function App() {
     <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white">
       <CharacterPanel />
       
+      {/* Decorative Side Elements */}
+      <div className="fixed right-12 top-0 bottom-0 w-[1px] bg-white/10 hidden md:block z-40">
+        <div className="absolute top-1/4 h-24 w-full bg-gradient-to-b from-transparent via-white/40 to-transparent" />
+        {/* Animated scroll dot marker */}
+        <motion.div 
+          className="absolute w-2 h-2 rounded-full bg-white left-1/2 -translate-x-1/2 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
+          style={{ top: '65%' }} // Manual positioning for now or link to scroll
+        />
+        {/* End markers */}
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 w-3 h-[1px] bg-white/40" />
+        <div className="absolute top-8 left-1/2 -translate-x-1/2 h-4 w-[1px] -translate-y-full flex flex-col items-center">
+           <div className="w-[1px] h-full bg-white/20" />
+           <div className="w-2 h-2 border-t border-r border-white/20 rotate-[-45deg] -translate-y-1" />
+        </div>
+      </div>
+
+      <div className="fixed right-6 top-1/2 -translate-y-1/2 vertical-text text-[10px] uppercase tracking-[0.4em] text-white/10 font-mono hidden lg:block select-none pointer-events-none">
+        LEFD • BΓYAB • SNAIO • SΓAΓO
+      </div>
+
+      <div className="fixed left-6 top-1/2 -translate-y-1/2 vertical-text rotate-180 text-[10px] uppercase tracking-[0.4em] text-white/10 font-mono hidden lg:block select-none pointer-events-none">
+        RHEΓORIC • LOGIC • EMPAΓHY • VISUAL CALCULUS
+      </div>
+
       {/* Action Controls */}
       <div className="fixed top-8 left-8 z-50 flex gap-3 items-center h-12">
         <LayoutGroup>
