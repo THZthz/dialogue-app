@@ -45,7 +45,9 @@ const aiResponseSchema = z.object({
   })).describe("State changes to persist in the world memory."),
   options: z.array(z.object({
     id: z.string().describe("Unique option ID (e.g., 'opt_demand_truth')."),
-    text: z.string().describe("User-facing label. Include [Skill: Difficulty] prefix if it's a skill-gated action."),
+    text: z.string().describe("User-facing label. Pure narrative text only."),
+    hintBefore: z.string().nullish().describe("Optional bracketed hint before text, e.g. '[Consult the Void]'."),
+    hintAfter: z.string().nullish().describe("Optional bracketed hint after text, e.g. '[Charm her.]'."),
     isAiTrigger: z.boolean().describe("Set to TRUE to continue the dynamic AI conversation loop. Set to FALSE to jump to static content."),
     nextStepId: z.string().nullish().describe("Required if isAiTrigger is FALSE. Must match a static scene ID like 'start' or 'leave'."),
     check: z.object({

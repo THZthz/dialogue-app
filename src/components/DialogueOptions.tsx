@@ -7,36 +7,6 @@ interface Props {
   onSelect: (option: DialogueOption) => void;
 }
 
-const parseDialogueContent = (text: string) => {
-  const fragments: { type: 'text' | 'hint'; content: string }[] = [];
-  const regex = /\[([^\]]+)\]/g;
-  let lastIndex = 0;
-  let match;
-
-  while ((match = regex.exec(text)) !== null) {
-    if (match.index > lastIndex) {
-      fragments.push({
-        type: 'text',
-        content: text.substring(lastIndex, match.index),
-      });
-    }
-    fragments.push({
-      type: 'hint',
-      content: `[${match[1]}]`,
-    });
-    lastIndex = regex.lastIndex;
-  }
-
-  if (lastIndex < text.length) {
-    fragments.push({
-      type: 'text',
-      content: text.substring(lastIndex),
-    });
-  }
-
-  return fragments;
-};
-
 export const DialogueOptions: React.FC<Props> = ({ options, onSelect }) => {
   return (
     <div className="mt-12 space-y-0 font-serif">
@@ -85,8 +55,6 @@ export const DialogueOptions: React.FC<Props> = ({ options, onSelect }) => {
           ? `[${option.check.skill} - ${option.check.difficultyText || 'Unknown'} ${option.check.difficulty}]`
           : null;
 
-        const fragments = parseDialogueContent(option.text);
-
         return (
           <motion.button
             key={option.id}
@@ -106,15 +74,13 @@ export const DialogueOptions: React.FC<Props> = ({ options, onSelect }) => {
                 {skillCheckHint && (
                   <span className="font-bold mr-1">{skillCheckHint}</span>
                 )}
-                {fragments.map((fragment, i) => (
-                  <React.Fragment key={i}>
-                    {fragment.type === 'hint' ? (
-                      <span className="font-bold">{fragment.content}</span>
-                    ) : (
-                      fragment.content
-                    )}
-                  </React.Fragment>
-                ))}
+                {option.hintBefore && (
+                  <span className="font-bold mr-1">{option.hintBefore}</span>
+                )}
+                {option.text}
+                {option.hintAfter && (
+                  <span className="font-bold ml-1">{option.hintAfter}</span>
+                )}
               </span>
             </div>
           </motion.button>

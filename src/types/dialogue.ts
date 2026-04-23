@@ -26,6 +26,8 @@ export interface Message {
 export interface DialogueOption {
   id: string;
   text: string;
+  hintBefore?: string; // e.g. "[Consult the Void]"
+  hintAfter?: string; // e.g. "[Charm her.]"
   nextStepId?: string; // Standard transition
   isAiTrigger?: boolean; // If true, request response from LLM
   isContinue?: boolean; // If true, render as a large CONTINUE button

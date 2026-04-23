@@ -48,7 +48,8 @@ export const sampleDialogue: Record<string, DialogueStep> = {
     options: [
       {
         id: 'opt_charm',
-        text: '"Surely a woman of your... elegance... can appreciate a shared interest." [Charm her.]',
+        text: '"Surely a woman of your... elegance... can appreciate a shared interest."',
+        hintAfter: '[Charm her.]',
         check: {
           skill: 'Suggestion',
           difficulty: 10,
@@ -78,7 +79,8 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       },
       {
         id: 'opt_threat',
-        text: '"Tell me what I want to know, or I\'ll burn this rat-nest to the ground." [Intimidate.]',
+        text: '"Tell me what I want to know, or I\'ll burn this rat-nest to the ground."',
+        hintAfter: '[Intimidate.]',
         check: {
           skill: 'Half Light',
           difficulty: 12,
@@ -102,7 +104,8 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       },
       {
         id: 'opt_ai',
-        text: '[Consult the Void] "Who is the Red Knight, really?"',
+        text: '"Who is the Red Knight, really?"',
+        hintBefore: '[Consult the Void]',
         isAiTrigger: true
       },
       {
@@ -112,7 +115,8 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       },
       {
         id: 'opt_demo',
-        text: '[Demo: Show me high-stakes UI and notifications.]',
+        text: '',
+        hintBefore: '[Demo: Show me high-stakes UI and notifications.]',
         nextStepId: 'red_check_demo'
       }
     ]
@@ -239,7 +243,7 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       }
     ],
     options: [
-      { id: 'leave', text: '[Leave quickly before things get violent.]', nextStepId: 'leave' }
+      { id: 'leave', text: '', hintBefore: '[Leave quickly before things get violent.]', nextStepId: 'leave' }
     ]
   },
   intimidate_success: {
@@ -292,7 +296,8 @@ export const sampleDialogue: Record<string, DialogueStep> = {
     options: [
       {
         id: 'restart',
-        text: '[Re-enter the Veil]',
+        text: '',
+        hintBefore: '[Re-enter the Veil]',
         nextStepId: 'start'
       }
     ]
