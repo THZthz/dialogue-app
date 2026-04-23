@@ -1,4 +1,5 @@
 import { ReactNode, createContext, useContext, useState } from 'react';
+import { WorldEntity, Character } from '../types/entities';
 
 export interface CharacterStats {
   logic: number;
@@ -13,19 +14,14 @@ export interface CharacterStats {
   physical_instrument: number;
 }
 
-export interface Character {
-  name: string;
-  stats: CharacterStats;
-}
-
 interface CharacterContextType {
-  character: Character;
+  character: { name: string; stats: CharacterStats };
   updateStat: (stat: keyof CharacterStats, value: number) => void;
   incrementStat: (stat: keyof CharacterStats) => void;
   getStatBySkillName: (skillName: string) => number;
 }
 
-const defaultCharacter: Character = {
+const defaultCharacter = {
   name: 'YOU',
   stats: {
     logic: 3,

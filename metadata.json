@@ -1,6 +1,6 @@
 {
   "name": "Elysian Dialogue",
-  "description": "A cinematic RPG-style dialogue application inspired by Disco Elysium, featuring a scrollable chat history and branching options.",
+  "description": "A cinematic RPG-style dialogue engine inspired by Disco Elysium, featuring dynamic Gemini AI dialogue, a centralized world state for objects, locations, and characters, and an evolutionary opinion system.",
   "requestFramePermissions": [],
   "majorCapabilities": []
 }

@@ -32,7 +32,7 @@ export const sampleDialogue: Record<string, DialogueStep> = {
       {
         speaker: 'SYSTEM',
         type: 'SYSTEM',
-        text: '"Things aren\'t going super well for Idiot Doom Spiral, either. Haven\'t found those keys yet; haven\'t won that great piece of ass back. No word from my business-buddies..." He takes a sip from his [beer](#unknown_obj).'
+        text: '"Things aren\'t going super well for Idiot Doom Spiral, either. Haven\'t found those keys yet; haven\'t won that great piece of ass back. No word from my business-buddies..." He takes a sip from his [beer](#intentional_unknown_obj).'
       },
       {
         speaker: 'SUGGESTION',
@@ -50,6 +50,11 @@ export const sampleDialogue: Record<string, DialogueStep> = {
         id: 'opt1',
         text: '"What do you guys do around here?"',
         nextStepId: 'about_here'
+      },
+      {
+        id: 'opt_ai',
+        text: '[Consult the Void] "What do you think about my partner, Kim?"',
+        isAiTrigger: true
       },
       {
         id: 'opt2',

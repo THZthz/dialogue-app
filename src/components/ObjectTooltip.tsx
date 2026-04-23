@@ -1,15 +1,18 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { WorldObject } from '../types/worldObject';
-import { ChevronDown, ChevronUp, Info } from 'lucide-react';
+import { WorldEntity } from '../types/entities';
+import { ChevronDown, ChevronUp, Info, User, MapPin, Box } from 'lucide-react';
 
 interface Props {
-  object: WorldObject;
+  object: WorldEntity;
   onClose?: () => void;
 }
 
 export const ObjectTooltip: React.FC<Props> = ({ object }) => {
   const [showLongDesc, setShowLongDesc] = useState(false);
+
+  const Icon = object.type === 'CHARACTER' ? User : object.type === 'LOCATION' ? MapPin : Box;
+  const typeColor = object.type === 'CHARACTER' ? 'text-pink-500' : object.type === 'LOCATION' ? 'text-green-500' : 'text-cyan-500';
 
   return (
     <motion.div
@@ -26,17 +29,35 @@ export const ObjectTooltip: React.FC<Props> = ({ object }) => {
             <h3 className="text-white font-serif font-bold text-lg leading-tight">
               {object.displayName}
             </h3>
-            <span className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">
-              {object.id}
-            </span>
+            <div className="flex items-center gap-2 mt-1">
+              <span className={`text-[10px] uppercase tracking-[0.2em] font-mono ${typeColor}`}>
+                {object.type}
+              </span>
+              <span className="text-[10px] text-gray-500 uppercase tracking-[0.2em] font-mono">
+                {object.id}
+              </span>
+            </div>
           </div>
-          <Info size={16} className="text-gray-600" />
+          <Icon size={16} className="text-gray-600" />
         </div>
 
         {/* Short Description */}
         <p className="text-gray-300 text-sm leading-relaxed mb-4">
           {object.shortDescription}
         </p>
+
+        {/* Character Opinions */}
+        {object.type === 'CHARACTER' && object.opinions && Object.keys(object.opinions).length > 0 && (
+          <div className="mb-4 space-y-2">
+            <div className="text-[10px] text-gray-500 uppercase tracking-widest font-mono">Opinions</div>
+            {Object.entries(object.opinions).map(([id, opinion]) => (
+              <div key={id} className="text-[11px] text-pink-200/70 italic bg-pink-900/10 p-2 rounded border border-pink-900/20">
+                <span className="font-bold uppercase tracking-tighter mr-1">{id}:</span>
+                "{opinion}"
+              </div>
+            ))}
+          </div>
+        )}
 
         {/* Attributes Grid */}
         <div className="grid grid-cols-1 gap-2 mb-4 bg-black/40 p-2 rounded border border-gray-900">

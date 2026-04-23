@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { objectManager } from '../services/ObjectManager';
+import { worldManager } from '../services/WorldManager';
 import { ObjectTooltip } from './ObjectTooltip';
 
 interface Props {
@@ -10,7 +10,7 @@ interface Props {
 
 export const ObjectLink: React.FC<Props> = ({ displayName, objectId }) => {
   const [isOpen, setIsOpen] = useState(false);
-  const object = objectManager.getObject(objectId);
+  const object = worldManager.getEntity(objectId);
   const containerRef = useRef<HTMLSpanElement>(null);
 
   // Close on outside click

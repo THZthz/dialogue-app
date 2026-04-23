@@ -23,6 +23,7 @@ export interface DialogueOption {
   id: string;
   text: string;
   nextStepId?: string; // Standard transition
+  isAiTrigger?: boolean; // If true, request response from Gemini
   check?: {
     skill: string;
     difficulty: number;

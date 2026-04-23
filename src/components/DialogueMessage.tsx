@@ -93,9 +93,9 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
         )}
         {!isSystem && <span className="text-gray-400 mr-2">–</span>}
       </div>
-      <p className={`${isInnerVoice ? 'text-[#9081e3]' : 'text-gray-100'} mt-1`}>
+      <div className={`${isInnerVoice ? 'text-[#9081e3]' : 'text-gray-100'} mt-1`}>
         {renderText(message.text)}
-      </p>
+      </div>
     </motion.div>
   );
 };

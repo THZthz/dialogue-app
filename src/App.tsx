@@ -13,15 +13,42 @@ import { DiceRoller } from './components/DiceRoller';
 import { CharacterPanel } from './components/CharacterPanel';
 import { motion, AnimatePresence } from 'motion/react';
 
+import { aiService, AIResponse } from './services/LlmService';
+import { worldManager } from './services/WorldManager';
+
 export default function App() {
   const [history, setHistory] = useState<Message[]>([]);
   const [currentStepId, setCurrentStepId] = useState<string>('start');
   const [isTyping, setIsTyping] = useState(false);
   const [currentCheck, setCurrentCheck] = useState<DialogueOption['check'] | null>(null);
+  const [dynamicOptions, setDynamicOptions] = useState<DialogueOption[] | null>(null);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const currentStep = sampleDialogue[currentStepId];
+
+  // Helper to apply AI response
+  const handleAIResponse = async (response: AIResponse) => {
+    // 1. Update World
+    response.worldUpdates.forEach(update => {
+      worldManager.updateEntity(update as any);
+    });
+
+    // 2. Display Messages
+    const aiMessages: Message[] = response.dialogue.map((m, i) => ({
+      ...m,
+      id: `ai-${Date.now()}-${i}`
+    }));
+    await displayMessages(aiMessages);
+
+    // 3. Set Options
+    const newOptions: DialogueOption[] = response.suggestedOptions.map(opt => ({
+      id: opt.id,
+      text: opt.text,
+      isAiTrigger: opt.isAiTrigger
+    }));
+    setDynamicOptions(newOptions);
+  };
 
   // Auto-scroll to bottom
   const scrollToBottom = () => {
@@ -76,10 +103,31 @@ export default function App() {
     };
     setHistory(prev => [...prev, youMessage]);
 
-    // 2. Handle Skill Check or Normal transition
+    // 2. Handle Skill Check, Normal transition, or AI Trigger
     if (option.check) {
       setCurrentCheck(option.check);
+    } else if (option.isAiTrigger) {
+      setDynamicOptions(null);
+      try {
+        setIsTyping(true);
+        const response = await aiService.generateResponse(
+          cleanText,
+          worldManager.getState(),
+          history
+        );
+        await handleAIResponse(response);
+      } catch (error) {
+        console.error("AI Error:", error);
+        setHistory(prev => [...prev, {
+          id: `error-${Date.now()}`,
+          speaker: 'SYSTEM',
+          type: 'SYSTEM',
+          text: `[Error: The voice of the void is silent. No AI connection. ${error}]`
+        }]);
+        setIsTyping(false);
+      }
     } else if (option.nextStepId) {
+      setDynamicOptions(null);
       const nextStep = sampleDialogue[option.nextStepId];
       if (!nextStep) return;
 
@@ -186,10 +234,10 @@ export default function App() {
 
           {/* Current Options */}
           <AnimatePresence mode="wait">
-            {!isTyping && !currentCheck && currentStep?.options && (
+            {!isTyping && !currentCheck && (dynamicOptions || currentStep?.options) && (
               <DialogueOptions 
-                key={currentStepId}
-                options={currentStep.options} 
+                key={dynamicOptions ? 'dynamic' : currentStepId}
+                options={dynamicOptions || currentStep?.options || []} 
                 onSelect={handleOptionSelect} 
               />
             )}

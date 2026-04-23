@@ -58,7 +58,8 @@ A single line of text in the history.
 Dialogue messages support interactive object links using a custom markdown-like syntax:
 `[Object Name](#object_id)`
 
-- **ObjectRegistry (`src/services/ObjectManager.ts`)**: Central storage for all world objects.
+- **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
+- **GeminiService (`src/services/GeminiService.ts`)**: Handles dynamic AI dialogue using the Gemini model. This system allows the game to evolve "on the fly," with the LLM modifying object descriptions and character opinions based on user interaction.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 
@@ -96,6 +97,12 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 2. Update the `defaultCharacter` object with a base value.
 3. Update the `CharacterPanel.tsx` visual if needed.
 
+### Adding New World Entities
+1. Open `src/services/WorldManager.ts`.
+2. Add a new entry to the appropriate initial state object (Objects, Locations, or Characters).
+3. Characters have an `opinions` field which tracks their relationship with other entities.
+4. Reference entities in dialogue using `[Display Name](#entity_id)`.
+
 ---
 
 ## 6. Component Breakdown
@@ -106,3 +113,5 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 - `DialogueMessage.tsx`: Handles message types and "Tooltips" for past roll results.
 - `DialogueOptions.tsx`: Maps choices to interaction events.
 - `TypingIndicator.tsx`: The "..." animated feedback.
+- `ObjectLink.tsx`: Parses object references and manages the hover-persistent state.
+- `ObjectTooltip.tsx`: Renders the detailed object lore and allows interaction via a "hover-bridge" padding technique.
