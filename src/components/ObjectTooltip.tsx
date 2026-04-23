@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { WorldEntity } from '../types/entities';
 import { ChevronDown, ChevronUp, Info, User, MapPin, Box } from 'lucide-react';
@@ -10,16 +10,54 @@ interface Props {
 
 export const ObjectTooltip: React.FC<Props> = ({ object }) => {
   const [showLongDesc, setShowLongDesc] = useState(false);
+  const [position, setPosition] = useState<{ vertical: 'above' | 'below', horizontal: 'left' | 'right' }>({
+    vertical: 'above',
+    horizontal: 'left'
+  });
+  const tooltipRef = useRef<HTMLDivElement>(null);
+
+  useLayoutEffect(() => {
+    if (tooltipRef.current) {
+      const rect = tooltipRef.current.getBoundingClientRect();
+      const viewportWidth = window.innerWidth;
+
+      let vertical: 'above' | 'below' = position.vertical;
+      let horizontal: 'left' | 'right' = position.horizontal;
+
+      // Check vertical space on mount for the initial appearance
+      // If the collapsed tooltip is already hitting the top of the viewport, flip it below.
+      if (rect.top < 0) {
+        vertical = 'below';
+      }
+
+      // Check horizontal space
+      if (rect.right > viewportWidth) {
+        horizontal = 'right';
+      } else if (rect.left < 0) {
+        horizontal = 'left';
+      }
+
+      setPosition({ vertical, horizontal });
+    }
+  }, []); // Run ONLY once on mount to keep position stable during interaction
 
   const Icon = object.type === 'CHARACTER' ? User : object.type === 'LOCATION' ? MapPin : Box;
   const typeColor = object.type === 'CHARACTER' ? 'text-pink-500' : object.type === 'LOCATION' ? 'text-green-500' : 'text-cyan-500';
 
+  const positionClasses = [
+    position.vertical === 'above' ? 'bottom-full mb-2' : 'top-full mt-2',
+    position.horizontal === 'left' ? 'left-0' : 'right-0'
+  ].join(' ');
+
+  const yOffset = position.vertical === 'above' ? 10 : -10;
+
   return (
     <motion.div
-      initial={{ opacity: 0, scale: 0.9, y: 10 }}
+      ref={tooltipRef}
+      initial={{ opacity: 0, scale: 0.9, y: yOffset }}
       animate={{ opacity: 1, scale: 1, y: 0 }}
-      exit={{ opacity: 0, scale: 0.9, y: 10 }}
-      className="absolute bottom-full left-0 pb-4 z-[100] w-72 overflow-visible"
+      exit={{ opacity: 0, scale: 0.9, y: yOffset }}
+      className={`absolute z-[100] w-72 overflow-visible ${positionClasses}`}
       id={`object-tooltip-${object.id}`}
     >
       <div className="bg-[#0a0a0a]/95 backdrop-blur-md border border-gray-800 rounded-lg shadow-2xl p-4 overflow-hidden">

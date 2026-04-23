@@ -45,7 +45,8 @@ export default function App() {
     const newOptions: DialogueOption[] = response.suggestedOptions.map(opt => ({
       id: opt.id,
       text: opt.text,
-      isAiTrigger: opt.isAiTrigger
+      isAiTrigger: opt.isAiTrigger,
+      nextStepId: opt.nextStepId
     }));
     setDynamicOptions(newOptions);
   };
@@ -101,31 +102,14 @@ export default function App() {
       type: 'YOU',
       text: cleanText
     };
-    setHistory(prev => [...prev, youMessage]);
+    
+    // Calculate updated history immediately to pass to AI
+    const updatedHistory = [...history, youMessage];
+    setHistory(updatedHistory);
 
     // 2. Handle Skill Check, Normal transition, or AI Trigger
     if (option.check) {
       setCurrentCheck(option.check);
-    } else if (option.isAiTrigger) {
-      setDynamicOptions(null);
-      try {
-        setIsTyping(true);
-        const response = await aiService.generateResponse(
-          cleanText,
-          worldManager.getState(),
-          history
-        );
-        await handleAIResponse(response);
-      } catch (error) {
-        console.error("AI Error:", error);
-        setHistory(prev => [...prev, {
-          id: `error-${Date.now()}`,
-          speaker: 'SYSTEM',
-          type: 'SYSTEM',
-          text: `[Error: The voice of the void is silent. No AI connection. ${error}]`
-        }]);
-        setIsTyping(false);
-      }
     } else if (option.nextStepId) {
       setDynamicOptions(null);
       const nextStep = sampleDialogue[option.nextStepId];
@@ -138,6 +122,26 @@ export default function App() {
 
       setCurrentStepId(option.nextStepId);
       await displayMessages(nextMessages);
+    } else if (option.isAiTrigger || dynamicOptions) {
+      setDynamicOptions(null);
+      try {
+        setIsTyping(true);
+        const response = await aiService.generateResponse(
+          cleanText,
+          worldManager.getState(),
+          updatedHistory
+        );
+        await handleAIResponse(response);
+      } catch (error) {
+        console.error("AI Error:", error);
+        setHistory(prev => [...prev, {
+          id: `error-${Date.now()}`,
+          speaker: 'SYSTEM',
+          type: 'SYSTEM',
+          text: `[Error: The voice of the void is silent. No AI connection.]`
+        }]);
+        setIsTyping(false);
+      }
     }
   };
 
