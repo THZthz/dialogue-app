@@ -1,0 +1,6 @@
+{
+  "name": "Elysian Dialogue",
+  "description": "A cinematic RPG-style dialogue application inspired by Disco Elysium, featuring a scrollable chat history and branching options.",
+  "requestFramePermissions": [],
+  "majorCapabilities": []
+}
