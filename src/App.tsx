@@ -18,13 +18,8 @@ import { worldManager } from '@/services/WorldManager';
 import { FastForward, Trash2 } from 'lucide-react';
 
 export default function App() {
-  const [history, setHistory] = useState<Message[]>(() => {
-    const saved = localStorage.getItem('elysian_history');
-    return saved ? JSON.parse(saved) : [];
-  });
-  const [currentStepId, setCurrentStepId] = useState<string>(() => {
-    return localStorage.getItem('elysian_currentStepId') || 'start';
-  });
+  const [history, setHistory] = useState<Message[]>([]);
+  const [currentStepId, setCurrentStepId] = useState<string>('start');
   const [isTyping, setIsTyping] = useState(false);
   const [currentCheck, setCurrentCheck] = useState<DialogueOption['check'] | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<DialogueOption[] | null>(null);
@@ -61,12 +56,6 @@ export default function App() {
   };
 
   const currentStep = sampleDialogue[currentStepId];
-
-  // Save to localStorage
-  useEffect(() => {
-    localStorage.setItem('elysian_history', JSON.stringify(history));
-    localStorage.setItem('elysian_currentStepId', currentStepId);
-  }, [history, currentStepId]);
 
   // Helper to apply AI response
   const handleAIResponse = async (response: AIResponse) => {
@@ -125,18 +114,36 @@ export default function App() {
     isFastForwardRef.current = false;
   };
 
-  const resetHistory = () => {
+  const resetHistory = async () => {
     setHistory([]);
     setCurrentStepId('start');
     setDynamicOptions(null);
-    localStorage.removeItem('elysian_history');
-    localStorage.removeItem('elysian_currentStepId');
+    await fetch('/api/reset', { method: 'POST' });
     window.location.reload();
   };
 
+  useEffect(() => {
+    async function loadData() {
+      await worldManager.loadState();
+      const res = await fetch('/api/history');
+      if (res.ok) {
+        const hist = await res.json();
+        if (hist.length > 0) {
+          setHistory(hist);
+          initializedRef.current = true;
+          // Set to AI interaction mode
+          setDynamicOptions([]); // Requires a real response or will show empty. Maybe we can fetch latest from AI if no options? Or just trust sample dialogue start.
+          // For now, let sampleDialogue take over if dynamicOptions is null, or if we restore, we need to generate options.
+          // Actually, if we just set dynamicOptions to null, it will show options for currentStepId which is 'start'. Let's restore state by re-triggering AI to continue the chat.
+        }
+      }
+    }
+    loadData();
+  }, []);
+
   const initializedRef = useRef(false);
 
-  // Initialize with the first step's messages ONLY if history is empty
+  // Initialize with the first step's messages ONLY if history is empty and data loaded
   useEffect(() => {
     if (currentStep && !initializedRef.current && history.length === 0) {
       initializedRef.current = true;
@@ -146,7 +153,7 @@ export default function App() {
       }));
       displayMessages(initialMessages);
     }
-  }, [history.length]);
+  }, [history.length, currentStep]);
 
   const handleOptionSelect = async (option: DialogueOption) => {
     if (isTyping || currentCheck) return; // Prevent double selecting
