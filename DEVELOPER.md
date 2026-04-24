@@ -120,6 +120,9 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 
 ## 7. Maintenance Log
 
+### 2026-04-24
+- **Scrollbar Fix**: Resolved issue where the internal scroll container (`main`) was not correctly established due to a `min-h-screen` layout constraint on both the parent and the child. Standardized the hierarchy to use `h-screen overflow-hidden` on the layout root and `h-full overflow-y-auto` on the scrollable main container. Fixed custom scrollbar visibility on smaller viewports.
+
 ### 2026-04-23
 - **LLM Upgrade**: Migrated from Google Generative AI SDK to **Vercel AI SDK** (`ai`).
 - **Model Switch**: Now using **DeepSeek-V3** (`deepseek-chat`) for narratively rich and structured RPG responses.

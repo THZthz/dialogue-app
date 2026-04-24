@@ -11,7 +11,7 @@ import { DialogueOptions } from './components/DialogueOptions';
 import { TypingIndicator } from './components/TypingIndicator';
 import { DiceRoller } from './components/DiceRoller';
 import { CharacterPanel } from './components/CharacterPanel';
-import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
+import { motion, AnimatePresence, LayoutGroup, useScroll, useTransform } from 'motion/react';
 
 import { aiService, AIResponse } from './services/LlmService';
 import { worldManager } from './services/WorldManager';
@@ -32,7 +32,33 @@ export default function App() {
   
   const isFastForwardRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const scrollBarRef = useRef<HTMLDivElement>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const { scrollYProgress } = useScroll({
+    container: scrollContainerRef,
+  });
+
+  const dotTop = useTransform(scrollYProgress, [0, 1], ["0%", "100%"]);
+
+  const handleScrollbarDrag = (_: any, info: any) => {
+    if (!scrollBarRef.current || !scrollContainerRef.current) return;
+    const container = scrollContainerRef.current;
+    const barRect = scrollBarRef.current.getBoundingClientRect();
+    const progress = Math.max(0, Math.min(1, (info.point.y - barRect.top) / barRect.height));
+    container.scrollTop = progress * (container.scrollHeight - container.clientHeight);
+  };
+
+  const handleBarClick = (e: React.MouseEvent) => {
+    if (!scrollBarRef.current || !scrollContainerRef.current) return;
+    const barRect = scrollBarRef.current.getBoundingClientRect();
+    const progress = Math.max(0, Math.min(1, (e.clientY - barRect.top) / barRect.height));
+    const container = scrollContainerRef.current;
+    container.scrollTo({
+      top: progress * (container.scrollHeight - container.clientHeight),
+      behavior: 'smooth'
+    });
+  };
 
   const currentStep = sampleDialogue[currentStepId];
 
@@ -232,16 +258,29 @@ export default function App() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white">
+    <div className="h-screen w-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white overflow-hidden relative">
       <CharacterPanel />
       
       {/* Decorative Side Elements */}
-      <div className="fixed right-12 top-0 bottom-0 w-[1px] bg-white/10 hidden md:block z-40">
-        <div className="absolute top-1/4 h-24 w-full bg-gradient-to-b from-transparent via-white/40 to-transparent" />
+      <div 
+        ref={scrollBarRef}
+        onClick={handleBarClick}
+        className="fixed right-12 top-0 bottom-0 w-[40px] hidden sm:flex justify-center cursor-pointer z-40 group"
+      >
+        <div className="w-[1px] h-full bg-white/10 group-hover:bg-white/20 transition-colors" />
+        <div className="absolute top-1/4 h-24 w-[1px] bg-gradient-to-b from-transparent via-white/40 to-transparent" />
         {/* Animated scroll dot marker */}
         <motion.div 
-          className="absolute w-2 h-2 rounded-full bg-white left-1/2 -translate-x-1/2 shadow-[0_0_10px_rgba(255,255,255,0.5)]"
-          style={{ top: '65%' }} // Manual positioning for now or link to scroll
+          drag="y"
+          dragConstraints={scrollBarRef}
+          dragElastic={0}
+          dragMomentum={false}
+          onDrag={handleScrollbarDrag}
+          className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
+          style={{ 
+            top: dotTop,
+            y: "-50%" 
+          }}
         />
         {/* End markers */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-3 h-[1px] bg-white/40" />
@@ -317,7 +356,7 @@ export default function App() {
       <main 
         id="dialogue-scroll-container"
         ref={scrollContainerRef}
-        className="relative w-full max-w-2xl min-h-screen px-8 py-24 overflow-y-auto scroll-smooth no-scrollbar"
+        className="relative w-full max-w-2xl h-full px-8 py-24 overflow-y-auto scroll-smooth no-scrollbar"
         style={{ scrollbarWidth: 'none' }}
       >
         <div className="flex flex-col min-h-full">

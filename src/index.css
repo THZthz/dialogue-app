@@ -2,15 +2,8 @@
 
 @layer base {
   html, body {
-    @apply bg-[#0a0a0a] antialiased;
+    @apply bg-[#0a0a0a] antialiased overflow-hidden h-full;
     font-family: 'Inter', sans-serif;
-    scrollbar-width: none;
-    -ms-overflow-style: none;
-  }
-  
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar {
-    display: none;
   }
 }
 
