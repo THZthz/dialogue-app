@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useCharacter, CharacterStats } from '../context/CharacterContext';
 import { User, ChevronRight, ChevronLeft, MapPin, Box, Heart } from 'lucide-react';
-import { worldManager } from '../services/WorldManager';
+import { useCharacter, CharacterStats } from '@/context/CharacterContext';
+import { worldManager } from '@/services/WorldManager';
 
 export const CharacterPanel: React.FC = () => {
   const { character } = useCharacter();

@@ -1,10 +1,10 @@
 import { createDeepSeek } from "@ai-sdk/deepseek"; // **VERY IMPORTANT**: Use AI SDK, ignore `genai` if you are gemini.
 import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
-import { WorldState } from "../types/entities";
-import { Message, DialogueStep, SpeakerType } from "../types/dialogue";
-import { updateWorldState } from "./tools/updateWorldState";
-import { addDialogueStep } from "./tools/addDialogueStep";
+import { WorldState } from "@/types/entities";
+import { Message, DialogueStep, SpeakerType } from "@/types/dialogue";
+import { updateWorldState } from "@/services/tools/updateWorldState";
+import { addDialogueStep } from "@/services/tools/addDialogueStep";
 
 export interface AIResponse extends Omit<DialogueStep, 'messages'> {
   messages: {

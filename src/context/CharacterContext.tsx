@@ -1,5 +1,5 @@
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { WorldEntity, Character } from '../types/entities';
+import { WorldEntity, Character } from '@/types/entities';
 
 export interface CharacterStats {
   logic: number;

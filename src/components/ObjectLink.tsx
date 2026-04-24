@@ -1,7 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { AnimatePresence } from 'motion/react';
-import { worldManager } from '../services/WorldManager';
-import { ObjectTooltip } from './ObjectTooltip';
+import { worldManager } from '@/services/WorldManager';
+import { ObjectTooltip } from '@/components/ObjectTooltip';
 
 interface Props {
   displayName: string;

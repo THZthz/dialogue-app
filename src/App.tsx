@@ -4,17 +4,17 @@
  */
 
 import React, { useState, useEffect, useRef } from 'react';
-import { Message, DialogueStep, DialogueOption } from './types/dialogue';
-import { sampleDialogue } from './data/sampleDialogue';
-import { DialogueMessage } from './components/DialogueMessage';
-import { DialogueOptions } from './components/DialogueOptions';
-import { TypingIndicator } from './components/TypingIndicator';
-import { DiceRoller } from './components/DiceRoller';
-import { CharacterPanel } from './components/CharacterPanel';
+import { Message, DialogueStep, DialogueOption } from '@/types/dialogue';
+import { sampleDialogue } from '@/data/sampleDialogue';
+import { DialogueMessage } from '@/components/DialogueMessage';
+import { DialogueOptions } from '@/components/DialogueOptions';
+import { TypingIndicator } from '@/components/TypingIndicator';
+import { DiceRoller } from '@/components/DiceRoller';
+import { CharacterPanel } from '@/components/CharacterPanel';
 import { motion, AnimatePresence, LayoutGroup, useScroll, useTransform } from 'motion/react';
 
-import { aiService, AIResponse } from './services/LlmService';
-import { worldManager } from './services/WorldManager';
+import { aiService, AIResponse } from '@/services/LlmService';
+import { worldManager } from '@/services/WorldManager';
 import { FastForward, Trash2 } from 'lucide-react';
 
 export default function App() {

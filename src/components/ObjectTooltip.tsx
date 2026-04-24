@@ -1,6 +1,6 @@
 import React, { useState, useRef, useLayoutEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { WorldEntity } from '../types/entities';
+import { WorldEntity } from '@/types/entities';
 import { ChevronDown, ChevronUp, Info, User, MapPin, Box } from 'lucide-react';
 
 interface Props {

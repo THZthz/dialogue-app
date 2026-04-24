@@ -1,8 +1,8 @@
 import {StrictMode} from 'react';
 import {createRoot} from 'react-dom/client';
-import App from './App.tsx';
-import './index.css';
-import { CharacterProvider } from './context/CharacterContext';
+import App from '@/App';
+import '@/index.css';
+import { CharacterProvider } from '@/context/CharacterContext';
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>

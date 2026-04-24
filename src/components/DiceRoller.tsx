@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useCharacter } from '../context/CharacterContext';
+import { useCharacter } from '@/context/CharacterContext';
 
 interface Props {
   skill: string;

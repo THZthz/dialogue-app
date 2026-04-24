@@ -1,4 +1,4 @@
-import { DialogueStep } from '../types/dialogue';
+import { DialogueStep } from '@/types/dialogue';
 
 export const sampleDialogue: Record<string, DialogueStep> = {
   start: {

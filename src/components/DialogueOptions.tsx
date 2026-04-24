@@ -1,5 +1,5 @@
 import React from 'react';
-import { DialogueOption } from '../types/dialogue';
+import { DialogueOption } from '@/types/dialogue';
 import { motion } from 'motion/react';
 
 interface Props {

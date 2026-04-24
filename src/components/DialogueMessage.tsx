@@ -1,8 +1,8 @@
 import React, { useState } from 'react';
-import { Message } from '../types/dialogue';
+import { Message } from '@/types/dialogue';
 import { motion, AnimatePresence } from 'motion/react';
-import { DieFace } from './DiceRoller';
-import { ObjectLink } from './ObjectLink';
+import { DieFace } from '@/components/DiceRoller';
+import { ObjectLink } from '@/components/ObjectLink';
 
 interface Props {
   message: Message;
