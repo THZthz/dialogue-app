@@ -304,9 +304,10 @@ export default function App() {
           <motion.button
             onClick={resetHistory}
             title="Reset Thought Stream"
+            initial={{ color: '#6b7280', borderColor: 'rgba(255, 255, 255, 0.05)' }}
             whileHover={{ scale: 1.1, color: '#ef4444', borderColor: 'rgba(239, 68, 68, 0.5)' }}
             whileTap={{ scale: 0.95 }}
-            className="h-11 w-11 flex-shrink-0 flex items-center justify-center bg-[#1a1a1a] border border-white/5 rounded-full shadow-lg z-10 text-gray-500"
+            className="h-11 w-11 flex-shrink-0 flex items-center justify-center bg-[#1a1a1a] border rounded-full shadow-lg z-10"
           >
             <Trash2 size={18} />
           </motion.button>
