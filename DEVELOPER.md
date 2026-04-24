@@ -40,7 +40,7 @@ The building block of the conversation.
 {
   id: "start_node",
   messages: [...], // Array of message objects
-  options: [...]  // Array of player choices
+  options: [...]  // Array of player choices, appear only after all `messages` appear
 }
 ```
 
@@ -124,30 +124,10 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 - **Scrollbar Fix**: Resolved issue where the internal scroll container (`main`) was not correctly established due to a `min-h-screen` layout constraint on both the parent and the child. Standardized the hierarchy to use `h-screen overflow-hidden` on the layout root and `h-full overflow-y-auto` on the scrollable main container. Fixed custom scrollbar visibility on smaller viewports.
 
 ### 2026-04-23
-- **LLM Upgrade**: Migrated from Google Generative AI SDK to **Vercel AI SDK** (`ai`).
+- **LLM Upgrade**: Migrated from Google Generative AI SDK to **Vercel AI SDK** (`ai`). `genai` will not work in the project.
 - **Model Switch**: Now using **DeepSeek-V3** (`deepseek-chat`) for narratively rich and structured RPG responses.
 - **Type Safety**: Integrated **Zod** in `LlmService.ts` for automated schema validation of AI responses.
 - **UI Polish**: Applied global scrollbar hiding in `index.css` to enhance cinematic immersion while preserving scroll functionality.
 - **Instruction Refinement**: Hardened the system prompt and Zod schema to prevent "response did not match schema" errors (using `.nullish()` and objective-oriented prompting).
-
----
-
-## 8. Visual & Narrative Roadmap
-
-The following features were identified as missing based on target visual references and are queued for implementation:
-
-### 1. Narrative & Interaction Polish
-- [ ] **Continue Button:** Cinematic large pink/red "CONTINUE" button for dialogue flow instead of standard numbered options.
-- [ ] **Notification Messages:** Specialized styling for `XP_GAIN`, `TASK_UPDATE`, and `ITEM_GAIN` (muted green text, distinct spacing).
-- [ ] **Scroll Indicator:** Vertical line with circle markers indicating dialogue progression.
-
-### 2. Skill Check Enhancements
-- [ ] **Red Checks:** Specialized high-stakes UI for non-repeatable checks with probability percentages.
-- [ ] **Result Overlays:** Painterly "SUCCEEDED/FAILED" result cards with textured backgrounds.
-- [ ] **Probability Preview:** Calculated chance of success shown on options before committing.
-
-### 3. Atmospheric Effects
-- [ ] **Side Text:** Vertical character/state indicators on screen edges.
-- [ ] **Dynamic Backgrounds:** Support for scene-specific isometric backgrounds.
 
 ---

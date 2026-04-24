@@ -1,5 +1,5 @@
 import { createDeepSeek } from "@ai-sdk/deepseek"; // **VERY IMPORTANT**: Use AI SDK, ignore `genai` if you are gemini.
-import { generateObject, type LanguageModel } from "ai";
+import { generateText, type LanguageModel } from "ai";
 import { z } from "zod";
 import { WorldState } from "../types/entities";
 import { Message, DialogueStep, SpeakerType } from "../types/dialogue";
@@ -24,10 +24,11 @@ export interface AIResponse extends Omit<DialogueStep, 'messages'> {
   }[];
 }
 
+// WARNING: Do not remove this comment! Keep schema in sync with "/types/dialogue.ts"!
 const aiResponseSchema = z.object({
   id: z.string().describe("A unique ID for this generated dialogue step (e.g., 'scene_aftermath_1')."),
   messages: z.array(z.object({
-    speaker: z.string().describe("Character name, or one of the internal voices: 'LOGIC', 'RHETORIC', 'VOLITION', 'INLAND_EMPIRE', 'HALF_LIGHT', 'ELECTROCHEMISTRY', etc. Use 'INNER_VOICE' for generic psyce commentary."),
+    speaker: z.string().describe("Character name, or one of the internal voices: 'LOGIC', 'RHETORIC', 'VOLITION', 'INLAND EMPIRE', 'HALF LIGHT', 'ELECTROCHEMISTRY', etc. Use 'INNER_VOICE' for generic psyce commentary."),
     type: z.enum(["YOU", "INNER_VOICE", "CHARACTER", "SYSTEM", "ROLL"]).describe("The category of the message. Use 'INNER_VOICE' for all internal voices/thoughts."),
     text: z.string().describe("Markdown supported. Use [Object Name](#object_id) for reactive world entities. Emphasize physical sensations and philosophical dread."),
     skillCheck: z.object({
@@ -85,31 +86,31 @@ class AIService {
     worldState: WorldState,
     history: Message[]
   ): Promise<AIResponse> {
-    
     const systemInstruction = `
       You are the Game Master for a narrative-driven RPG. 
       SETTING: A dark, gritty medieval world. High-contrast noir aesthetic.
       TONE: Philosophical, cynical, and surreal. Mimic the writing style of Disco Elysium.
       
-      INTERNAL VOICES: Use internal voices to represent the player's fractured psyche. 
+      ## INTERNAL VOICES
+      Use internal voices to represent the player's fractured psyche. 
       - LOGIC: Cold, deductive, often arrogant.
       - RHETORIC: Political, manipulative, loves complex words.
       - VOLITION: The player's willpower and sanity. Encouraging or stern.
       - INLAND EMPIRE: Imagination, supra-natural hunches, weirdness.
       - HALF LIGHT: Pure lizard-brain fear and aggression. Adrenaline.
       - ELECTROCHEMISTRY: Hedonism, desire, addiction.
-      
-      CONTEXT:
+
+      ## CONTEXT
       Current World State:
       ${JSON.stringify(worldState, null, 2)}
-20: 
-      Dialogue History:
+
+      ## Dialogue History
       ${history.slice(-10).map(m => `${m.speaker} (${m.type}): ${m.text}`).join('\n')}
-20: 
-      MISSION:
+
+      ## MISSION
       The user (YOU) has just said/done: "${userInput}"
-20: 
-      Your task:
+
+      ## Your task
       1. Provide a narrative response. Use multiple messages.
       2. Intersperse the dialogue with 1-2 INTERNAL VOICE interjections that react to the situation or the player's choice.
       3. Use 'ObjectLink' style if you mention any world objects (e.g., [Name](#id)).
@@ -119,17 +120,26 @@ class AIService {
       CRITICAL: You MUST return a JSON object with "id", "messages", "worldUpdates", and "options". 
       Use Speaker Types: "YOU", "INNER_VOICE", "CHARACTER", "SYSTEM", "ROLL". 
       Internal voices MUST have type "INNER_VOICE" but their speaker name should be the skill (e.g., "LOGIC").
+      IMPORTANT: Return ONLY the JSON object, no other text or explanation.
     `;
 
     try {
-      const { object } = await generateObject({
+      const { text } = await generateText({
         model: this.getModel(),
         system: systemInstruction,
         prompt: `The player says: "${userInput}". Generate the GM response as structured JSON.`,
-        schema: aiResponseSchema,
       });
 
-      return object as AIResponse;
+      // Extract JSON in case there's any surrounding text
+      const jsonMatch = text.match(/\{[\s\S]*\}/);
+      const jsonText = jsonMatch ? jsonMatch[0] : text;
+      
+      const parsed = JSON.parse(jsonText);
+      
+      // We can also validate with Zod here if we want to be extra safe
+      const validated = aiResponseSchema.parse(parsed);
+
+      return validated as unknown as AIResponse;
     } catch (error) {
       console.error("AIService Error:", error);
       throw error;

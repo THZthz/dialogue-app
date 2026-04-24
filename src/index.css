@@ -2,7 +2,11 @@
 
 @layer base {
   html, body {
-    @apply bg-[#0a0a0a] antialiased overflow-hidden h-full;
+    background-color: #0a0a0a;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    overflow: hidden;
+    height: 100%;
     font-family: 'Inter', sans-serif;
   }
 }
