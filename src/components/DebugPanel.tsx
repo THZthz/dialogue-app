@@ -753,10 +753,15 @@ export const DebugPanel: React.FC = () => {
       <button
         id="debug-panel-toggle"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 bg-[#1a1a1a] text-white p-3 rounded-full shadow-2xl z-50 flex items-center justify-center border border-white/10 hover:border-white/40 hover:scale-110 active:scale-95 transition-all"
+        className="fixed bottom-8 right-8 z-50 h-11 min-w-[2.75rem] px-3 bg-[#1a1a1a] border border-[#ff6b35]/30 rounded-full text-[#ff6b35] hover:bg-[#ff6b35] hover:text-white transition-all duration-300 shadow-lg group flex items-center justify-center overflow-hidden"
         title="Open Debug Panel"
       >
-        <Bug size={20} />
+        <div className="flex items-center justify-center">
+          <Bug size={20} className="shrink-0" />
+          <span className="max-w-0 overflow-hidden group-hover:max-w-[120px] group-hover:ml-3 transition-all duration-300 ease-in-out whitespace-nowrap text-[12px] uppercase tracking-widest font-sans font-bold">
+            Debug
+          </span>
+        </div>
       </button>
 
       <AnimatePresence>

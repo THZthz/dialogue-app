@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **UI Enhancement**: Unified the "Toggle" buttons for `DebugPanel` and `CharacterPanel`.
+  - Re-styled the debug toggle button to use the same orange pill-shaped design as the character toggle.
+  - Implemented the same hover-to-expand behavior for the "Debug" label to match the "Character" label's rhythm.
+  - Symmetrically positioned the debug toggle at the bottom-right for consistent user interaction.
 - **Refactor**: Improved `DebugPanel.tsx` internal structure.
   - Extracted the "Logs" tab logic into a dedicated `LlmTraceViewer` component.
   - Encapsulated log-specific state (`logs`, `expandedId`, `isLoading`) and synchronization functions (`fetchLogs`, `clearLogs`) within the sub-component for better maintainability.
