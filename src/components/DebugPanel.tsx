@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug } from 'lucide-react';
+import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
+import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface LlmLog {
   id: string;
@@ -56,12 +58,27 @@ export const DebugPanel: React.FC = () => {
     }
   };
 
+  const customStyle = {
+    ...vscDarkPlus,
+    'pre[class*="language-"]': {
+      ...vscDarkPlus['pre[class*="language-"]'],
+      margin: 0,
+      padding: '0.75rem',
+      backgroundColor: 'transparent',
+      fontSize: '11px',
+    },
+    'code[class*="language-"]': {
+      ...vscDarkPlus['code[class*="language-"]'],
+      fontSize: '11px',
+    }
+  };
+
   return (
     <>
       <button
         id="debug-panel-toggle"
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-4 right-4 bg-gray-900 text-white p-3 rounded-full shadow-lg hover:bg-gray-800 transition-colors z-50 flex items-center justify-center border border-gray-700"
+        className="fixed bottom-4 right-4 bg-gray-900 text-white p-3 rounded-full shadow-lg hover:bg-gray-800 transition-colors z-50 flex items-center justify-center border border-gray-700 hover:scale-110 active:scale-95 transition-all"
         title="Open Debug Panel"
       >
         <Bug size={20} />
@@ -76,98 +93,125 @@ export const DebugPanel: React.FC = () => {
             exit={{ opacity: 0, x: 300 }}
             className="fixed inset-y-0 right-0 w-full md:w-160 bg-gray-900 text-gray-100 shadow-2xl z-50 flex flex-col border-l border-gray-700 font-mono text-sm"
           >
-            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-800">
+            <div className="flex items-center justify-between p-4 border-b border-gray-700 bg-gray-900/90 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center gap-2">
                 <Terminal size={18} className="text-blue-400" />
-                <h2 className="font-bold">LLM Debug Console</h2>
+                <h2 className="font-bold tracking-tight text-white">DEBUG_CONSOLEX_LOG</h2>
               </div>
               <div className="flex items-center gap-3">
                 <button
                   onClick={fetchLogs}
-                  className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors"
+                  className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-white transition-colors"
                   title="Refresh"
                 >
-                  <RefreshCw size={18} className={isLoading ? 'animate-spin' : ''} />
+                  <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
                 </button>
                 <button
                   onClick={clearLogs}
-                  className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-red-400 transition-colors"
+                  className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-red-400 transition-colors"
                   title="Clear Logs"
                 >
-                  <Trash2 size={18} />
+                  <Trash2 size={16} />
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
-                  className="p-1 hover:bg-gray-700 rounded text-gray-400 hover:text-white transition-colors"
+                  className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-white transition-colors"
                 >
                   <X size={18} />
                 </button>
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-2">
+            <div className="flex-1 overflow-y-auto p-4 debug-scrollbar space-y-4">
               {logs.length === 0 ? (
-                <div className="text-center py-20 text-gray-500 italic">
-                  No logs recorded yet.
+                <div className="flex flex-col items-center justify-center h-full text-gray-600 italic">
+                  <Bug size={48} className="opacity-10 mb-4" />
+                  <p>Awaiting LLM transmission...</p>
                 </div>
               ) : (
-                <div className="space-y-1">
+                <div className="space-y-3">
                   {logs.map((log) => (
                     <div
                       key={log.id}
-                      className={`border rounded overflow-hidden transition-colors ${
-                        expandedId === log.id ? 'border-gray-600 bg-gray-800/50' : 'border-gray-800 hover:border-gray-700'
+                      className={`border rounded-lg overflow-hidden transition-all duration-200 ${
+                        expandedId === log.id 
+                          ? 'border-blue-500/50 bg-gray-800/20 ring-1 ring-blue-500/20' 
+                          : 'border-gray-800 hover:border-gray-700 bg-gray-900/50'
                       }`}
                     >
                       <button
                         onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
-                        className="w-full text-left p-3 flex items-center justify-between gap-4"
+                        className="w-full text-left p-3 flex items-center justify-between gap-4 group"
                       >
-                        <div className="flex items-center gap-2 min-w-0">
-                          {expandedId === log.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
-                          <span className={`${log.status === 'ERROR' ? 'text-red-400' : 'text-green-400'} text-[10px] font-bold uppercase`}>
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className={`p-1 rounded ${expandedId === log.id ? 'bg-blue-500/20 text-blue-400' : 'text-gray-600 group-hover:text-gray-400'}`}>
+                            {expandedId === log.id ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
+                          </div>
+                          <span className={`px-1.5 py-0.5 rounded text-[9px] font-bold tracking-widest uppercase ${
+                            log.status === 'ERROR' ? 'bg-red-500/10 text-red-400 border border-red-500/20' : 'bg-green-500/10 text-green-400 border border-green-500/20'
+                          }`}>
                             {log.status}
                           </span>
-                          <span className="text-gray-400 truncate text-xs">
-                            {new Date(log.timestamp).toLocaleTimeString()}
+                          <span className="text-gray-400 font-mono text-xs tabular-nums">
+                            {new Date(log.timestamp).toLocaleTimeString([], { hour12: true, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
                           </span>
                         </div>
-                        <div className="flex items-center gap-2 text-[10px]">
-                          <span className="text-gray-500">{log.duration}ms</span>
+                        <div className="flex items-center gap-2 font-mono text-[10px]">
+                          <span className={`${(log.duration || 0) > 2000 ? 'text-orange-400' : 'text-gray-500'}`}>
+                            {log.duration}ms
+                          </span>
                         </div>
                       </button>
 
                       <AnimatePresence>
                         {expandedId === log.id && (
                           <motion.div
-                            initial={{ height: 0 }}
-                            animate={{ height: 'auto' }}
-                            exit={{ height: 0 }}
-                            className="overflow-hidden"
+                            initial={{ height: 0, opacity: 0 }}
+                            animate={{ height: 'auto', opacity: 1 }}
+                            exit={{ height: 0, opacity: 0 }}
+                            transition={{ duration: 0.2 }}
+                            className="overflow-hidden border-t border-gray-800"
                           >
-                            <div className="p-4 pt-0 space-y-4">
-                              <section>
-                                <h3 className="text-xs font-bold text-blue-400 mb-1 flex items-center gap-1">
-                                  Request
+                            <div className="divide-y divide-gray-800">
+                              <div className="p-4 bg-black/20">
+                                <h3 className="text-[10px] font-bold text-blue-500/80 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                  Outgoing_Request
                                 </h3>
-                                <pre className="bg-black/50 p-2 rounded text-[11px] overflow-x-auto border border-gray-800 max-h-60">
-                                  {formatJson(log.request)}
-                                </pre>
-                              </section>
-                              <section>
-                                <h3 className="text-xs font-bold text-purple-400 mb-1 flex items-center gap-1">
-                                  Response
+                                <div className="rounded-md border border-gray-800 bg-gray-950 overflow-hidden debug-scrollbar">
+                                  <SyntaxHighlighter
+                                    language="json"
+                                    style={customStyle as any}
+                                    customStyle={{ margin: 0, background: 'transparent' }}
+                                  >
+                                    {formatJson(log.request)}
+                                  </SyntaxHighlighter>
+                                </div>
+                              </div>
+                              <div className="p-4 bg-black/40">
+                                <h3 className="text-[10px] font-bold text-purple-500/80 uppercase tracking-widest mb-2 flex items-center gap-2">
+                                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                                  Incoming_Response
                                 </h3>
-                                <pre className="bg-black/50 p-2 rounded text-[11px] overflow-x-auto border border-gray-800 max-h-80">
-                                  {formatJson(log.response)}
-                                </pre>
-                              </section>
+                                <div className="rounded-md border border-gray-800 bg-gray-950 overflow-hidden debug-scrollbar">
+                                  <SyntaxHighlighter
+                                    language="json"
+                                    style={customStyle as any}
+                                    customStyle={{ margin: 0, background: 'transparent' }}
+                                  >
+                                    {formatJson(log.response)}
+                                  </SyntaxHighlighter>
+                                </div>
+                              </div>
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
                   ))}
+                  <div className="pt-8 text-center opacity-20 hover:opacity-100 transition-opacity">
+                    <p className="text-[10px] uppercase tracking-widest">End_of_Transmission_Log</p>
+                  </div>
                 </div>
               )}
             </div>
@@ -177,3 +221,4 @@ export const DebugPanel: React.FC = () => {
     </>
   );
 };
+

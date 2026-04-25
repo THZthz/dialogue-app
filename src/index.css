@@ -25,6 +25,25 @@
   }
 }
 
+/* Custom scrollbar for Debug Panel */
+.debug-scrollbar::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.debug-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.debug-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
+  border-radius: 10px;
+}
+
+.debug-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.2);
+}
+
 /* Background texture effect */
 .bg-texture {
   position: fixed;

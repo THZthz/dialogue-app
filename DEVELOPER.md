@@ -35,6 +35,7 @@ The project follows a full-stack structure with React on the frontend and an Exp
 │   ├── index.css            # Global styles and Tailwind imports
 │   ├── components/          # React UI Components
 │   │   ├── CharacterPanel.tsx   # Sidebar for character stats and world registered entities
+│   │   ├── DebugPanel.tsx       # Overlay for LLM request/response debugging. Displays transmission logs and JSON payloads.
 │   │   ├── DialogueMessage.tsx  # Individual message styling. Handles message types and "Tooltips" for past roll results.
 │   │   ├── DialogueOptions.tsx  # List of player choices
 │   │   ├── DiceRoller.tsx       # Skill check simulation
@@ -47,9 +48,10 @@ The project follows a full-stack structure with React on the frontend and an Exp
 │   │   └── sampleDialogue.ts    # Seed dialogue data
 │   ├── server/              # Backend Logic
 │   │   ├── api.ts               # Express route handlers
-│   │   ├── datebase.ts          # Database connection/initialization
+│   │   ├── database.ts          # Database connection/initialization
 │   │   ├── LlmServiceBackend.ts # Server-side AI orchestration
 │   │   └── models/              # DB interactions
+│   │       ├── debug.ts         # LLM interaction logging
 │   │       ├── history.ts       # Conversation history queries
 │   │       ├── plot.ts          # Story progression queries
 │   │       └── world.ts         # Entities and world state queries
