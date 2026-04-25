@@ -49,10 +49,10 @@ function getDeepSeekModel(): LanguageModel | null {
 function getModelInfo(): { model: LanguageModel; name: string } {
   const google = getGoogleModel();
   if (google) return { model: google, name: 'gemini-3.1-flash-lite-preview' };
-  
+
   const deepseek = getDeepSeekModel();
   if (deepseek) return { model: deepseek, name: 'deepseek-chat' };
-  
+
   throw new Error(
     "Missing API Key: Please set GEMINI_API_KEY or DEEPSEEK_API_KEY in the application settings or .env file."
   );
@@ -66,7 +66,7 @@ export async function generateAIResponse(
   const plots = getAllPlots();
 
   const activePlots = plots.filter(p => p.status === 'PENDING' || p.status === 'IN_PROGRESS');
-  
+
   const systemInstruction = `
     You are the Game Master for a narrative-driven RPG. 
     SETTING: A dark, gritty medieval world. High-contrast noir aesthetic.
@@ -143,46 +143,46 @@ export async function generateAIResponse(
     updateLlmLog(logId, result, duration, 'SUCCESS');
 
     if (result.toolCalls) {
-    for (const call of result.toolCalls) {
-      if (call.toolName === 'updateWorldState') {
-        const payload = (call as any).args;
-        if (payload && payload.updates) {
-          for (const u of payload.updates) {
-            updateEntity(u);
+      for (const call of result.toolCalls) {
+        if (call.toolName === 'updateWorldState') {
+          const payload = (call as any).args;
+          if (payload && payload.updates) {
+            for (const u of payload.updates) {
+              updateEntity(u);
+            }
           }
+        } else if (call.toolName === 'addDialogueStep') {
+          finalResponse = { ...(call as any).args };
+        } else if (call.toolName === 'updatePlotStatus') {
+          const payload = (call as any).args;
+          updatePlotStatus(payload.id, payload.status);
+        } else if (call.toolName === 'addPlot') {
+          const payload = (call as any).args;
+          addPlot({
+            title: payload.title,
+            description: payload.description,
+            triggerCondition: payload.triggerCondition
+          });
         }
-      } else if (call.toolName === 'addDialogueStep') {
-        finalResponse = { ...(call as any).args };
-      } else if (call.toolName === 'updatePlotStatus') {
-        const payload = (call as any).args;
-        updatePlotStatus(payload.id, payload.status);
-      } else if (call.toolName === 'addPlot') {
-        const payload = (call as any).args;
-        addPlot({
-          title: payload.title,
-          description: payload.description,
-          triggerCondition: payload.triggerCondition
-        });
       }
     }
-  }
 
-  if (!finalResponse) {
-    if (result.text) {
-      finalResponse = {
-        messages: [{
-          speaker: 'SYSTEM',
-          type: 'SYSTEM',
-          text: result.text
-        }],
-        options: [{ id: 'opt_1', text: 'Continue', isAiTrigger: true }]
-      };
-    } else {
-      throw new Error("AI failed to return dialogue step.");
+    if (!finalResponse) {
+      if (result.text) {
+        finalResponse = {
+          messages: [{
+            speaker: 'SYSTEM',
+            type: 'SYSTEM',
+            text: result.text
+          }],
+          options: [{ id: 'opt_1', text: 'Continue', isAiTrigger: true }]
+        };
+      } else {
+        throw new Error("AI failed to return dialogue step.");
+      }
     }
-  }
 
-  return finalResponse;
+    return finalResponse;
   } catch (error: any) {
     const duration = Date.now() - startTime;
     updateLlmLog(logId, { error: error.message, stack: error.stack }, duration, 'ERROR');

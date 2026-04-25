@@ -62,16 +62,16 @@ apiRouter.post("/reset", (req, res) => {
 apiRouter.post("/chat", async (req, res) => {
   try {
     const { userInput, history } = req.body;
-    
+
     // Save user message to DB
     const lastMsg = history[history.length - 1]; // This is the YOU message
     if (lastMsg && lastMsg.type === 'YOU') {
       addMessage(lastMsg);
     }
-    
+
     // Process with AI
     const rawResponse = await generateAIResponse(userInput, history);
-    
+
     // Save AI messages to DB
     if (rawResponse && rawResponse.messages) {
       rawResponse.messages.forEach((msg: any, i: number) => {

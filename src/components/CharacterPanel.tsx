@@ -56,7 +56,7 @@ export const CharacterPanel: React.FC = () => {
               <h2 className="text-[20px] font-sans font-bold uppercase tracking-[0.2em] text-white">
                 Notebook
               </h2>
-              <button 
+              <button
                 onClick={() => setIsOpen(false)}
                 className="text-gray-500 hover:text-white transition-colors"
               >
@@ -66,13 +66,13 @@ export const CharacterPanel: React.FC = () => {
 
             {/* Tabs */}
             <div className="flex border-b border-white/10 mb-8">
-              <button 
+              <button
                 onClick={() => setActiveTab('STATS')}
                 className={`pb-2 px-4 text-[10px] uppercase tracking-[0.2em] transition-colors focus:outline-none ${activeTab === 'STATS' ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]' : 'text-gray-500 hover:text-gray-300'}`}
               >
                 Attributes
               </button>
-              <button 
+              <button
                 onClick={() => setActiveTab('WORLD')}
                 className={`pb-2 px-4 text-[10px] uppercase tracking-[0.2em] transition-colors focus:outline-none ${activeTab === 'WORLD' ? 'text-[#ff6b35] border-b-2 border-[#ff6b35]' : 'text-gray-500 hover:text-gray-300'}`}
               >
@@ -111,7 +111,7 @@ export const CharacterPanel: React.FC = () => {
                             </span>
                           </div>
                           <div className="h-[2px] bg-white/5 w-full relative overflow-hidden">
-                            <motion.div 
+                            <motion.div
                               initial={{ width: 0 }}
                               animate={{ width: `${(value / 10) * 100}%` }}
                               className="absolute h-full bg-[#ff6b35]"
@@ -139,7 +139,7 @@ export const CharacterPanel: React.FC = () => {
                               <span className="text-[14px] font-sans text-white font-bold">{entity.displayName}</span>
                             </div>
                             <p className="text-[11px] text-gray-400 line-clamp-2">{entity.shortDescription}</p>
-                            
+
                             {entity.type === 'CHARACTER' && entity.opinions && (
                               <div className="mt-2 pt-2 border-t border-white/5">
                                 <div className="flex items-center gap-1 text-[9px] text-[#ff6b35] uppercase tracking-widest mb-1">

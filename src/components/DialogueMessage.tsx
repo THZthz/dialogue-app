@@ -26,7 +26,7 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
     // 1. Split for italics: *text*
     // 2. Split for object links: [display](#id)
     // We combine these into a robust parsing strategy
-    
+
     // First, identify all special patterns and split the text
     // Regex matches either *italic* or [object](#id)
     const pattern = /(\*.*?\*|\[.*?\]\(#.*?\))/g;
@@ -37,14 +37,14 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
       if (part.startsWith('*') && part.endsWith('*')) {
         return <em key={i} className="italic opacity-90">{part.slice(1, -1)}</em>;
       }
-      
+
       // Handle Object Links: [name](#id)
       const objMatch = part.match(/\[(.*?)\]\(#(.*?)\)/);
       if (objMatch) {
         const [, displayName, objectId] = objMatch;
         return <ObjectLink key={i} displayName={displayName} objectId={objectId} />;
       }
-      
+
       return part;
     });
   };
@@ -63,7 +63,7 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
           </span>
         )}
         {message.skillCheck && (
-          <div 
+          <div
             className="relative inline-block"
             onMouseEnter={() => setIsTooltipVisible(true)}
             onMouseLeave={() => setIsTooltipVisible(false)}
@@ -71,7 +71,7 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
             <span className="text-white/40 text-[14px] mr-2 uppercase cursor-help hover:text-white/80 transition-colors">
               [{message.skillCheck.difficulty}: <span className={message.skillCheck.success ? 'text-[#9eff9e]' : 'text-[#ff6b6b]'}>{message.skillCheck.success ? 'Success' : 'Failure'}</span>]
             </span>
-            
+
             <AnimatePresence>
               {isTooltipVisible && message.rollResult && (
                 <motion.div
@@ -81,9 +81,9 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
                   className="absolute bottom-full left-0 mb-4 p-4 bg-[#111] border border-white/10 rounded-sm shadow-[0_10px_40px_rgba(0,0,0,0.8)] z-50 min-w-[180px]"
                 >
                   <div className="absolute -bottom-2 left-4 w-4 h-4 bg-[#111] rotate-45 border-r border-b border-white/10" />
-                  
+
                   <div className="text-[10px] uppercase tracking-[0.2em] text-gray-500 mb-3 border-b border-white/10 pb-2">Roll Result</div>
-                  
+
                   <div className="flex gap-2 mb-4 items-center">
                     {message.rollResult.dice.map((val, idx) => (
                       <div key={idx} className="w-10 h-10 rounded-sm border border-white/20 bg-[#222] flex items-center justify-center shadow-inner">
@@ -94,7 +94,7 @@ export const DialogueMessage: React.FC<Props> = ({ message }) => {
                       +{message.rollResult.skillBonus ?? 0}
                     </div>
                   </div>
-                  
+
                   <div className="space-y-1">
                     <div className="flex justify-between items-baseline">
                       <span className="text-[10px] text-gray-500 uppercase tracking-wider">Total</span>

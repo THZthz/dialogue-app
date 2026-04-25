@@ -25,7 +25,7 @@ export default function App() {
   const [currentCheck, setCurrentCheck] = useState<DialogueOption['check'] | null>(null);
   const [dynamicOptions, setDynamicOptions] = useState<DialogueOption[] | null>(null);
   const [isFastForward, setIsFastForward] = useState(false);
-  
+
   const isFastForwardRef = useRef(false);
   const scrollContainerRef = useRef<HTMLDivElement>(null);
   const scrollBarRef = useRef<HTMLDivElement>(null);
@@ -91,12 +91,12 @@ export default function App() {
     setIsTyping(true);
     setIsFastForward(false);
     isFastForwardRef.current = false;
-    
+
     for (const msg of messages) {
       if (!isFastForwardRef.current) {
         // Calculate delay based on message length (min 1s, max 3s)
         const delay = Math.min(Math.max(msg.text.length * 20, 1000), 3000);
-        
+
         // Wait in chunks to allow fast-forward to interrupt
         const startTime = Date.now();
         while (Date.now() - startTime < delay && !isFastForwardRef.current) {
@@ -107,7 +107,7 @@ export default function App() {
       }
       setHistory(prev => [...prev, msg]);
     }
-    
+
     setIsTyping(false);
     setIsFastForward(false); // Reset after batch
     isFastForwardRef.current = false;
@@ -163,14 +163,14 @@ export default function App() {
     if (!option.isContinue) {
       // 1. Add "YOU" message immediately
       // Strip skill hints like [Logic: Medium] but keep action tags like [Leave] if they aren't skill checks
-      
+
       const youMessage: Message = {
         id: `you-${Date.now()}`,
         speaker: 'YOU',
         type: 'YOU',
         text: cleanText
       };
-      
+
       // Calculate updated history immediately to pass to AI
       updatedHistory = [...history, youMessage];
       setHistory(updatedHistory);
@@ -216,7 +216,7 @@ export default function App() {
 
   const handleRollComplete = async (total: number, success: boolean, dice: number[]) => {
     if (!currentCheck) return;
-    
+
     let outcomeStepId: string | null = null;
     const skillBonus = total - dice.reduce((a, b) => a + b, 0);
 
@@ -239,7 +239,7 @@ export default function App() {
     }
 
     const nextStep = sampleDialogue[outcomeStepId];
-    
+
     const rollData = {
       dice,
       total,
@@ -266,9 +266,9 @@ export default function App() {
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white overflow-hidden relative">
       <CharacterPanel />
-      
+
       {/* Decorative Side Elements */}
-      <div 
+      <div
         ref={scrollBarRef}
         onClick={handleBarClick}
         className="fixed right-12 top-0 bottom-0 w-[40px] hidden sm:flex justify-center cursor-pointer z-40 group"
@@ -276,23 +276,23 @@ export default function App() {
         <div className="w-[1px] h-full bg-white/10 group-hover:bg-white/20 transition-colors" />
         <div className="absolute top-1/4 h-24 w-[1px] bg-gradient-to-b from-transparent via-white/40 to-transparent" />
         {/* Animated scroll dot marker */}
-        <motion.div 
+        <motion.div
           drag="y"
           dragConstraints={scrollBarRef}
           dragElastic={0}
           dragMomentum={false}
           onDrag={handleScrollbarDrag}
           className="absolute w-2.5 h-2.5 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.6)] cursor-grab active:cursor-grabbing hover:scale-125 transition-transform"
-          style={{ 
+          style={{
             top: dotTop,
-            y: "-50%" 
+            y: "-50%"
           }}
         />
         {/* End markers */}
         <div className="absolute top-8 left-1/2 -translate-x-1/2 w-3 h-[1px] bg-white/40" />
         <div className="absolute top-8 left-1/2 -translate-x-1/2 h-4 w-[1px] -translate-y-full flex flex-col items-center">
-           <div className="w-[1px] h-full bg-white/20" />
-           <div className="w-2 h-2 border-t border-r border-white/20 rotate-[-45deg] -translate-y-1" />
+          <div className="w-[1px] h-full bg-white/20" />
+          <div className="w-2 h-2 border-t border-r border-white/20 rotate-[-45deg] -translate-y-1" />
         </div>
       </div>
 
@@ -317,7 +317,7 @@ export default function App() {
           >
             <Trash2 size={18} />
           </motion.button>
-          
+
           <AnimatePresence>
             {isTyping && (
               <motion.button
@@ -349,7 +349,7 @@ export default function App() {
       {/* Moody background overlay */}
       <div className="bg-texture" />
       <div className="fixed inset-0 pointer-events-none overflow-hidden">
-        <div 
+        <div
           className="absolute inset-0 opacity-20"
           style={{
             backgroundImage: `radial-gradient(circle at 50% 50%, #444, #000)`,
@@ -360,7 +360,7 @@ export default function App() {
       </div>
 
       {/* Main Content Area */}
-      <main 
+      <main
         id="dialogue-scroll-container"
         ref={scrollContainerRef}
         className="relative w-full max-w-2xl h-full px-8 py-24 overflow-y-auto scroll-smooth no-scrollbar"
@@ -379,9 +379,9 @@ export default function App() {
             ))}
             <AnimatePresence>
               {currentCheck && (
-                <DiceRoller 
-                  {...currentCheck} 
-                  onComplete={handleRollComplete} 
+                <DiceRoller
+                  {...currentCheck}
+                  onComplete={handleRollComplete}
                 />
               )}
             </AnimatePresence>
@@ -392,10 +392,10 @@ export default function App() {
           {/* Current Options */}
           <AnimatePresence mode="wait">
             {!isTyping && !currentCheck && (dynamicOptions || currentStep?.options) && (
-              <DialogueOptions 
+              <DialogueOptions
                 key={dynamicOptions ? 'dynamic' : currentStepId}
-                options={dynamicOptions || currentStep?.options || []} 
-                onSelect={handleOptionSelect} 
+                options={dynamicOptions || currentStep?.options || []}
+                onSelect={handleOptionSelect}
               />
             )}
           </AnimatePresence>
