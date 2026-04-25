@@ -1,13 +1,12 @@
 import { createDeepSeek } from "@ai-sdk/deepseek";
+// Try to use Google Gen AI for the plot writer, fallback to deepseek
+import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
 import { WorldState } from "../types/entities.js";
 import { Message } from "../types/dialogue.js";
 import { getAllEntities, updateEntity } from "./worldModel.js";
 import { getAllPlots, addPlot, updatePlotStatus } from "./plotModel.js";
-// Try to use Google Gen AI for the plot writer, fallback to deepseek
-import { createGoogleGenerativeAI } from "@ai-sdk/google";
-
 import { updateWorldState } from "../services/tools/updateWorldState.js";
 import { addDialogueStep } from "../services/tools/addDialogueStep.js";
 
@@ -19,11 +18,12 @@ function getGoogleModel(): LanguageModel | null {
     try {
       googleModelInstance = createGoogleGenerativeAI({
         apiKey: process.env.GEMINI_API_KEY,
-      })('gemini-1.5-pro');
+      })('gemini-3.1-flash-lie-preview');
     } catch (e) {
       console.error("Failed to initialize Google model:", e);
     }
   }
+  console.log("Get gemini model.");
   return googleModelInstance;
 }
 
@@ -37,6 +37,7 @@ function getDeepSeekModel(): LanguageModel | null {
       console.error("Failed to initialize DeepSeek model:", e);
     }
   }
+  console.log("Get deepseek model.");
   return deepseekModelInstance;
 }
 
