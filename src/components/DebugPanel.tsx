@@ -4,6 +4,11 @@ import {
   Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug, 
   GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle 
 } from 'lucide-react';
+import CodeMirror from '@uiw/react-codemirror';
+import { json } from '@codemirror/lang-json';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
+import { jsonSchema } from 'codemirror-json-schema';
 import { Message } from '@/types/dialogue';
 import { WorldState, WorldEntity } from '@/types/entities';
 
@@ -62,128 +67,138 @@ const ResizableContainer: React.FC<{
   );
 };
 
-const JsonNode: React.FC<{
-  label?: string;
-  value: any;
-  depth: number;
-  isLast?: boolean;
-}> = ({ label, value, depth, isLast = true }) => {
-  const [isExpanded, setIsExpanded] = useState(depth < 1);
-  const hasChildren = value !== null && typeof value === 'object';
-  const isEmpty = hasChildren && (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0);
-
-  const renderValue = () => {
-    if (value === null) return <span className="text-gray-500">null</span>;
-    if (typeof value === 'string') return <span className="text-emerald-400">"{value}"</span>;
-    if (typeof value === 'number') return <span className="text-amber-400">{value}</span>;
-    if (typeof value === 'boolean') return <span className="text-purple-400 font-bold">{value.toString()}</span>;
-    
-    if (Array.isArray(value)) {
-       if (isEmpty) return <span className="text-gray-600">[]</span>;
-       
-       return isExpanded ? (
-         <span>
-           <span className="text-gray-500">[</span>
-           <div className="pl-4 border-l border-gray-800/50 ml-1.5 my-0.5">
-             {value.map((v, i) => (
-               <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
-             ))}
-           </div>
-           <span className="text-gray-500">]</span>
-         </span>
-       ) : (
-         <button 
-          onClick={() => setIsExpanded(true)}
-          className="text-gray-500 hover:text-blue-400 bg-gray-800/30 px-1 rounded transition-colors text-[10px]"
-         >
-           [{value.length} items]
-         </button>
-       );
-    }
-    
-    // Object
-    if (isEmpty) return <span className="text-gray-600">{"{}"}</span>;
-
-    return isExpanded ? (
-      <span>
-        <span className="text-gray-500">{"{"}</span>
-        <div className="pl-4 border-l border-gray-800/50 ml-1.5 my-0.5">
-          {Object.entries(value).map(([k, v], i, arr) => (
-            <JsonNode key={k} label={k} value={v} depth={depth + 1} isLast={i === arr.length - 1} />
-          ))}
-        </div>
-        <span className="text-gray-500">{"}"}</span>
-      </span>
-    ) : (
-      <button 
-        onClick={() => setIsExpanded(true)}
-        className="text-gray-500 hover:text-blue-400 bg-gray-800/30 px-1 rounded transition-colors text-[10px]"
-      >
-        {"{ " + Object.keys(value).slice(0, 2).join(', ') + (Object.keys(value).length > 2 ? '...' : '') + " }"}
-      </button>
-    );
-  };
-
-  return (
-    <div className="font-mono text-[11px] leading-relaxed group/node">
-      <div className="flex items-start">
-        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
-          {hasChildren && !isEmpty && (
-            <button 
-              onClick={() => setIsExpanded(!isExpanded)}
-              className={`text-gray-500 hover:text-blue-400 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
-            >
-              <ChevronDown size={12} />
-            </button>
-          )}
-        </div>
-        
-        <div className="flex-1 min-w-0">
-          {label && (
-            <span className="text-sky-400 mr-2 group-hover/node:text-sky-300 transition-colors">
-              <span className="opacity-50">"</span>{label}<span className="opacity-50">"</span>
-              <span className="text-gray-600 ml-1">:</span>
-            </span>
-          )}
-          {renderValue()}
-          {!isLast && <span className="text-gray-600">,</span>}
-        </div>
-      </div>
-    </div>
-  );
+const MESSAGE_SCHEMA = {
+  type: 'array',
+  items: {
+    type: 'object',
+    properties: {
+      id: { type: 'string', description: 'Unique identifier for the message' },
+      speaker: { type: 'string', description: 'Name of the entity speaking' },
+      type: { 
+        enum: ['YOU', 'INNER_VOICE', 'CHARACTER', 'SYSTEM', 'ROLL', 'NOTIFICATION'],
+        description: 'Style/category of the message'
+      },
+      text: { type: 'string', description: 'Content of the message' },
+      metadata: {
+        type: 'object',
+        properties: {
+          notificationType: { enum: ['XP', 'TASK', 'ITEM'] }
+        }
+      }
+    },
+    required: ['id', 'speaker', 'type', 'text']
+  }
 };
 
+const ENTITY_SCHEMA = {
+  type: 'object',
+  properties: {
+    id: { type: 'string', description: 'Unique identifier for the entity' },
+    type: { enum: ['OBJECT', 'LOCATION', 'CHARACTER'], description: 'Category of world entity' },
+    displayName: { type: 'string', description: 'Friendly name shown in UI' },
+    shortDescription: { type: 'string' },
+    longDescription: { type: 'string' },
+    attributes: { type: 'object', description: 'Additional dynamic properties' },
+    stats: { type: 'object', description: 'Numeric character attributes (only for CHARACTER)' },
+    opinions: { type: 'object', description: 'Relationship mapping (only for CHARACTER)' }
+  },
+  required: ['id', 'type', 'displayName']
+};
+
+const debugTheme = EditorView.theme({
+  "&": {
+    fontSize: "11px",
+    backgroundColor: "transparent !important",
+  },
+  ".cm-content": {
+    fontFamily: "var(--font-mono)",
+  },
+  ".cm-gutters": {
+    backgroundColor: "transparent !important",
+    borderRight: "1px solid rgba(255, 255, 255, 0.05)",
+    color: "#4b5563 !important",
+    minWidth: "32px",
+  },
+  ".cm-activeLineGutter": {
+    backgroundColor: "rgba(255, 255, 255, 0.05) !important",
+    color: "#9ca3af !important",
+  },
+  ".cm-activeLine": {
+    backgroundColor: "rgba(255, 255, 255, 0.02) !important",
+  },
+  ".cm-selectionBackground": {
+    backgroundColor: "rgba(59, 130, 246, 0.2) !important",
+  },
+  ".cm-tooltip": {
+    border: "1px solid rgba(255, 255, 255, 0.1) !important",
+    backgroundColor: "#0f172a !important",
+    backdropFilter: "blur(12px)",
+    borderRadius: "8px",
+    boxShadow: "0 10px 15px -3px rgba(0, 0, 0, 0.5)",
+    padding: "4px",
+    color: "#e2e8f0",
+  },
+  ".cm-tooltip-autocomplete > ul": {
+    fontFamily: "var(--font-mono)",
+  },
+  ".cm-tooltip-autocomplete > ul > li[aria-selected]": {
+    backgroundColor: "rgba(59, 130, 246, 0.2) !important",
+    color: "#60a5fa !important",
+    borderRadius: "4px",
+  },
+  /* Schema documentation tooltips */
+  ".cm-json-schema-tooltip": {
+    padding: "8px",
+    maxWidth: "300px",
+  },
+  ".cm-json-schema-tooltip-title": {
+    color: "#60a5fa",
+    fontWeight: "bold",
+    marginBottom: "4px",
+    fontSize: "10px",
+    textTransform: "uppercase",
+    letterSpacing: "0.1em",
+  },
+  ".cm-json-schema-tooltip-description": {
+    fontSize: "11px",
+    lineHeight: "1.4",
+    opacity: "0.8",
+  }
+}, { dark: true });
+
 const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
-  const [parsed, setParsed] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [formatted, setFormatted] = useState<string>('');
+  const [isJson, setIsJson] = useState(true);
 
   useEffect(() => {
     if (!data) return;
     try {
-      setParsed(JSON.parse(data));
-      setError(null);
+      setFormatted(JSON.stringify(JSON.parse(data), null, 2));
+      setIsJson(true);
     } catch (e) {
-      setError(data);
+      setFormatted(data);
+      setIsJson(false);
     }
   }, [data]);
 
   if (!data) return <div className="p-4 text-gray-600 italic text-xs">Empty Transmission</div>;
   
-  if (error) {
-    return (
-      <div className="p-3 h-full overflow-auto debug-scrollbar bg-black/40">
-        <pre className="text-red-400/80 text-[11px] font-mono whitespace-pre-wrap leading-relaxed">
-          {error}
-        </pre>
-      </div>
-    );
-  }
-
-  if (!parsed) return null;
-
   return (
-    <div className="p-3 h-full overflow-auto debug-scrollbar bg-black/20">
-      <JsonNode value={parsed} depth={0} />
+    <div className="h-full bg-black/20">
+      <CodeMirror
+        value={formatted}
+        height="100%"
+        theme={oneDark}
+        extensions={[json(), debugTheme]}
+        readOnly={true}
+        editable={false}
+        basicSetup={{
+          lineNumbers: true,
+          foldGutter: true,
+          highlightActiveLine: false,
+        }}
+        className={`h-full text-[11px] ${!isJson ? 'opacity-70 grayscale' : ''}`}
+      />
     </div>
   );
 };
@@ -265,7 +280,7 @@ const HistoryEditor: React.FC = () => {
 
   return (
     <div className="flex flex-col h-full overflow-hidden">
-      <div className="flex items-center justify-between mb-4">
+      <div className="flex items-center justify-between h-9 mb-4">
         <div className="flex items-center gap-2">
           <MessageSquare size={16} className="text-emerald-400" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-emerald-500/80">Dialogue_Buffer</h3>
@@ -273,7 +288,7 @@ const HistoryEditor: React.FC = () => {
         <button
           onClick={handleSave}
           disabled={isSaving}
-          className="flex items-center gap-2 px-3 py-1.5 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded-md border border-emerald-500/30 transition-all disabled:opacity-50"
+          className="flex items-center gap-2 px-3 py-1 bg-emerald-600/20 text-emerald-400 hover:bg-emerald-600/30 rounded-md border border-emerald-500/30 transition-all disabled:opacity-50"
         >
           <Save size={14} />
           <span className="text-[10px] font-bold uppercase">{isSaving ? 'Syncing...' : 'Sync_Buffer'}</span>
@@ -288,11 +303,21 @@ const HistoryEditor: React.FC = () => {
       )}
 
       <div className="flex-1 min-h-0 relative">
-        <textarea
+        <CodeMirror
           value={editingJson}
-          onChange={(e) => setEditingJson(e.target.value)}
-          className="w-full h-full bg-black/40 border border-gray-800 rounded-md p-4 font-mono text-[11px] text-gray-300 focus:outline-none focus:border-emerald-500/50 resize-none debug-scrollbar"
-          spellCheck={false}
+          height="100%"
+          theme={oneDark}
+          extensions={[json(), jsonSchema(MESSAGE_SCHEMA), debugTheme]}
+          onChange={(value) => setEditingJson(value)}
+          className="h-full border border-gray-800 rounded-md overflow-hidden relative z-0"
+          basicSetup={{
+            lineNumbers: true,
+            foldGutter: true,
+            dropCursor: true,
+            allowMultipleSelections: false,
+            indentOnInput: true,
+          }}
+          style={{ fontSize: '11px' }}
         />
       </div>
     </div>
@@ -358,7 +383,7 @@ const WorldEditor: React.FC = () => {
   return (
     <div className="flex h-full overflow-hidden gap-4">
       <div className="w-1/3 flex flex-col border-r border-gray-800 pr-4">
-        <div className="flex items-center gap-2 mb-4">
+        <div className="flex items-center gap-2 h-9 mb-4">
           <Database size={16} className="text-blue-400" />
           <h3 className="text-xs font-bold uppercase tracking-widest text-blue-500/80">Entity_Manifest</h3>
         </div>
@@ -403,12 +428,12 @@ const WorldEditor: React.FC = () => {
       <div className="flex-1 flex flex-col min-w-0">
         {selectedEntityId ? (
           <div className="flex flex-col h-full">
-            <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center justify-between h-9 mb-4">
               <h3 className="text-xs font-bold uppercase tracking-widest text-gray-500">Subject: {selectedEntityId}</h3>
               <button
                 onClick={handleSave}
                 disabled={isSaving}
-                className="flex items-center gap-2 px-3 py-1.5 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded-md border border-blue-500/30 transition-all disabled:opacity-50"
+                className="flex items-center gap-2 px-3 py-1 bg-blue-600/20 text-blue-400 hover:bg-blue-600/30 rounded-md border border-blue-500/30 transition-all disabled:opacity-50"
               >
                 <Save size={14} />
                 <span className="text-[10px] font-bold uppercase">{isSaving ? 'Syncing...' : 'Update_Manifest'}</span>
@@ -423,11 +448,21 @@ const WorldEditor: React.FC = () => {
             )}
 
             <div className="flex-1 min-h-0">
-              <textarea
+              <CodeMirror
                 value={editingJson}
-                onChange={(e) => setEditingJson(e.target.value)}
-                className="w-full h-full bg-black/40 border border-gray-800 rounded-md p-4 font-mono text-[11px] text-gray-300 focus:outline-none focus:border-blue-500/50 resize-none debug-scrollbar"
-                spellCheck={false}
+                height="100%"
+                theme={oneDark}
+                extensions={[json(), jsonSchema(ENTITY_SCHEMA), debugTheme]}
+                onChange={(value) => setEditingJson(value)}
+                className="h-full border border-gray-800 rounded-md overflow-hidden relative z-0"
+                basicSetup={{
+                  lineNumbers: true,
+                  foldGutter: true,
+                  dropCursor: true,
+                  allowMultipleSelections: false,
+                  indentOnInput: true,
+                }}
+                style={{ fontSize: '11px' }}
               />
             </div>
           </div>
@@ -534,24 +569,6 @@ export const DebugPanel: React.FC = () => {
                 <TabButton id="world" label="World" icon={<Database size={14} />} />
               </div>
               <div className="flex items-center gap-3 pr-4">
-                {activeTab === 'logs' && (
-                  <>
-                    <button
-                      onClick={fetchLogs}
-                      className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-white transition-colors"
-                      title="Refresh"
-                    >
-                      <RefreshCw size={16} className={isLoading ? 'animate-spin' : ''} />
-                    </button>
-                    <button
-                      onClick={clearLogs}
-                      className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-red-400 transition-colors"
-                      title="Clear Logs"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </>
-                )}
                 <button
                   onClick={() => setIsOpen(false)}
                   className="p-1.5 hover:bg-gray-800 rounded-md text-gray-400 hover:text-white transition-colors"
@@ -561,10 +578,34 @@ export const DebugPanel: React.FC = () => {
               </div>
             </div>
 
-            <div className="flex-1 overflow-y-auto p-4 debug-scrollbar min-h-0">
+            <div className="flex-1 p-4 min-h-0 flex flex-col">
               {activeTab === 'logs' && (
-                <div className="space-y-4">
-                  {logs.length === 0 ? (
+                <div className="flex flex-col h-full overflow-hidden">
+                  <div className="flex items-center justify-between h-9 mb-4 flex-shrink-0">
+                    <div className="flex items-center gap-2">
+                      <Terminal size={16} className="text-sky-400" />
+                      <h3 className="text-xs font-bold uppercase tracking-widest text-sky-500/80">LLM_TRACE</h3>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <button
+                        onClick={fetchLogs}
+                        disabled={isLoading}
+                        className="flex items-center gap-2 px-3 py-1 bg-sky-500/10 text-sky-400 hover:bg-sky-500/20 rounded-md border border-sky-500/30 transition-all disabled:opacity-50"
+                      >
+                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+                        <span className="text-[10px] font-bold uppercase">Refresh</span>
+                      </button>
+                      <button
+                        onClick={clearLogs}
+                        className="flex items-center gap-2 px-3 py-1 bg-red-400/10 text-red-400 hover:bg-red-400/20 rounded-md border border-red-500/30 transition-all"
+                      >
+                        <Trash2 size={14} />
+                        <span className="text-[10px] font-bold uppercase">Clear</span>
+                      </button>
+                    </div>
+                  </div>
+                  <div className="flex-1 space-y-4 overflow-y-auto debug-scrollbar pr-1">
+                    {logs.length === 0 ? (
                     <div className="flex flex-col items-center justify-center h-full text-gray-600 italic py-20">
                       <Bug size={48} className="opacity-10 mb-4" />
                       <p>Awaiting LLM transmission...</p>
@@ -649,6 +690,7 @@ export const DebugPanel: React.FC = () => {
                       </div>
                     </div>
                   )}
+                  </div>
                 </div>
               )}
 

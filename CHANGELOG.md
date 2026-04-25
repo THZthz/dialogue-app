@@ -3,6 +3,12 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Feature**: Upgraded Debug Panel JSON Editors.
+  - Replaced basic textareas with **CodeMirror** in History and World editors.
+  - Added syntax highlighting, code folding (collapsing), and indentation support.
+  - Implemented **JSON Schema** hinting and validation for `Message` and `WorldEntity` types using `codemirror-json-schema`.
+  - Upgraded "Logs" viewer to use read-only CodeMirror for a unified, high-fidelity experience.
+  - **Design**: Customized CodeMirror theme to align with the application's dark aesthetic, including themed tooltips, gutters, and selection highlights.
 - **Feature**: Expanded Debug Panel with State Editors.
   - Added "History" tab to view and modify dialogue message buffers.
   - Added "World" tab to view and modify world entities (characters, locations, objects) via a manifest list and JSON editor.
