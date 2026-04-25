@@ -1,28 +1,21 @@
 import { ReactNode, createContext, useContext, useState } from 'react';
-import { WorldEntity, Character } from '@/types/entities';
-
-export interface CharacterStats {
-  logic: number;
-  rhetoric: number;
-  empathy: number;
-  perception: number;
-  volition: number;
-  endurance: number;
-  inland_empire: number;
-  suggestion: number;
-  half_light: number;
-  physical_instrument: number;
-}
+import { Character, CharacterStats } from '@/types/entities';
 
 interface CharacterContextType {
-  character: { name: string; stats: CharacterStats };
+  character: Character;
   updateStat: (stat: keyof CharacterStats, value: number) => void;
   incrementStat: (stat: keyof CharacterStats) => void;
   getStatBySkillName: (skillName: string) => number;
 }
 
-const defaultCharacter = {
-  name: 'YOU',
+const defaultCharacter: Character = {
+  id: 'player',
+  type: 'CHARACTER',
+  displayName: 'YOU',
+  shortDescription: 'The protagonist.',
+  longDescription: 'A detective in a state of existential crisis.',
+  attributes: {},
+  opinions: {},
   stats: {
     logic: 3,
     rhetoric: 2,

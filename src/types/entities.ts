@@ -1,5 +1,18 @@
 export type EntityType = 'OBJECT' | 'LOCATION' | 'CHARACTER';
 
+export interface CharacterStats {
+  logic: number;
+  rhetoric: number;
+  empathy: number;
+  perception: number;
+  volition: number;
+  endurance: number;
+  inland_empire: number;
+  suggestion: number;
+  half_light: number;
+  physical_instrument: number;
+}
+
 export interface BaseEntity {
   id: string;
   type: EntityType;

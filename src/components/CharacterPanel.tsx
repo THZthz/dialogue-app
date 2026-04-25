@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { User, ChevronRight, ChevronLeft, MapPin, Box, Heart } from 'lucide-react';
-import { useCharacter, CharacterStats } from '@/context/CharacterContext';
+import { useCharacter } from '@/context/CharacterContext';
+import { CharacterStats } from '@/types/entities';
 import { worldManager } from '@/services/WorldManager';
 
 export const CharacterPanel: React.FC = () => {
@@ -88,7 +89,7 @@ export const CharacterPanel: React.FC = () => {
                       Identity
                     </div>
                     <div className="p-4 bg-[#1a1a1a] border border-white/5 rounded-sm">
-                      <div className="text-[18px] font-sans text-white mb-1">{character.name}</div>
+                      <div className="text-[18px] font-sans text-white mb-1">{character.displayName}</div>
                       <div className="text-[12px] text-gray-500 uppercase tracking-wider">Wandering Outsider</div>
                     </div>
                   </div>
