@@ -137,11 +137,15 @@ const debugTheme = EditorView.theme({
     background: "transparent",
   },
   ".cm-scroller::-webkit-scrollbar-thumb": {
-    background: "rgba(255, 255, 255, 0.1)",
+    background: "rgba(255, 255, 255, 0.05)",
     borderRadius: "0px",
   },
   ".cm-scroller::-webkit-scrollbar-thumb:hover": {
-    background: "rgba(255, 255, 255, 0.2)",
+    background: "rgba(255, 255, 255, 0.15)",
+  },
+  ".cm-scroller": {
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgba(255, 255, 255, 0.05) transparent",
   },
   ".cm-selectionBackground": {
     backgroundColor: "rgba(255, 255, 255, 0.1) !important",
