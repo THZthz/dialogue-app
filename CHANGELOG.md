@@ -7,6 +7,11 @@ All notable changes to this project will be documented in this file.
   - Implemented `llm_logs` SQLite table for persistent request/response tracking.
   - Created `/api/debug/logs` endpoints to fetch and manage performance/interaction data.
   - Added `DebugPanel` UI component with real-time log viewing, JSON formatting, and error highlighting.
+- **UI Enhancement**: Improved `DebugPanel` usability.
+  - Added `ResizableContainer` for `Outgoing_Request` and `Incoming_Response` messages, allowing users to vertically scale boxes via a drag handle.
+  - Added "Copy" buttons to both Request and Response sections for quick clipboard access with visual feedback.
+  - Standardized custom `debug-scrollbar` styling for both vertical and horizontal axes.
+  - Fixed horizontal scrollbar positioning and visibility during resizing by integrating styles directly into the syntax highlighter.
 - **Documentation**: Corrected file paths (`datebase.ts`, `models/`, `tools/`) in `DEVELOPER.md` structure map.
 - **Documentation**: Updated `DEVELOPER.md` with a comprehensive project structure breakdown, including detailed descriptions for key directories and files to improve onboarding and codebase navigation.
 - **Project Maintenance**: Moved maintenance log from `DEVELOPER.md` to `CHANGELOG.md`.

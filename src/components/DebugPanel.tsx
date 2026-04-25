@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug } from 'lucide-react';
+import { Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug, GripHorizontal, Copy, Check } from 'lucide-react';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -12,6 +12,83 @@ interface LlmLog {
   duration: number | null;
   status: string;
 }
+
+const ResizableContainer: React.FC<{
+  children: React.ReactNode;
+  defaultHeight?: number;
+  className?: string;
+}> = ({ children, defaultHeight = 150, className }) => {
+  const [height, setHeight] = useState(defaultHeight);
+  const [isResizing, setIsResizing] = useState(false);
+
+  const startResizing = useCallback((mouseDownEvent: React.MouseEvent) => {
+    setIsResizing(true);
+    const startY = mouseDownEvent.clientY;
+    const startHeight = height;
+
+    const onMouseMove = (mouseMoveEvent: MouseEvent) => {
+      const newHeight = startHeight + mouseMoveEvent.clientY - startY;
+      setHeight(Math.max(80, newHeight));
+    };
+
+    const onMouseUp = () => {
+      setIsResizing(false);
+      window.removeEventListener('mousemove', onMouseMove);
+      window.removeEventListener('mouseup', onMouseUp);
+    };
+
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+  }, [height]);
+
+  return (
+    <div 
+      className={`relative rounded-md border border-gray-800 bg-gray-950 flex flex-col group/resizable overflow-hidden ${className}`}
+      style={{ height: `${height}px` }}
+    >
+      <div className="flex-1 min-h-0 relative">
+        {children}
+      </div>
+      <div 
+        onMouseDown={startResizing}
+        className={`h-2.5 w-full flex items-center justify-center cursor-ns-resize hover:bg-blue-500/20 active:bg-blue-500/30 transition-colors border-t border-gray-800/50 flex-shrink-0 relative z-10 ${isResizing ? 'bg-blue-500/30' : ''}`}
+      >
+        <div className={`w-8 h-1 rounded-full transition-colors ${isResizing ? 'bg-blue-400' : 'bg-gray-800 group-hover/resizable:bg-gray-700'}`} />
+      </div>
+    </div>
+  );
+};
+
+const CopyButton: React.FC<{ content: string }> = ({ content }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(content);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy!', err);
+    }
+  };
+
+  return (
+    <button
+      onClick={handleCopy}
+      className={`p-1 rounded transition-all flex items-center gap-1.5 ${
+        copied 
+          ? 'bg-green-500/20 text-green-400' 
+          : 'bg-gray-800 text-gray-400 hover:text-white hover:bg-gray-700'
+      }`}
+      title={copied ? "Copied!" : "Copy to clipboard"}
+    >
+      {copied ? <Check size={12} /> : <Copy size={12} />}
+      <span className="text-[10px] font-bold uppercase tracking-wider">
+        {copied ? 'Copied' : 'Copy'}
+      </span>
+    </button>
+  );
+};
 
 export const DebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -66,6 +143,8 @@ export const DebugPanel: React.FC = () => {
       padding: '0.75rem',
       backgroundColor: 'transparent',
       fontSize: '11px',
+      height: '100%',
+      overflow: 'auto',
     },
     'code[class*="language-"]': {
       ...vscDarkPlus['code[class*="language-"]'],
@@ -174,34 +253,42 @@ export const DebugPanel: React.FC = () => {
                           >
                             <div className="divide-y divide-gray-800">
                               <div className="p-4 bg-black/20">
-                                <h3 className="text-[10px] font-bold text-blue-500/80 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                                  Outgoing_Request
-                                </h3>
-                                <div className="rounded-md border border-gray-800 bg-gray-950 overflow-hidden debug-scrollbar">
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="text-[10px] font-bold text-blue-500/80 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-blue-500 shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                    Outgoing_Request
+                                  </h3>
+                                  <CopyButton content={formatJson(log.request)} />
+                                </div>
+                                <ResizableContainer>
                                   <SyntaxHighlighter
                                     language="json"
                                     style={customStyle as any}
                                     customStyle={{ margin: 0, background: 'transparent' }}
+                                    className="debug-scrollbar"
                                   >
                                     {formatJson(log.request)}
                                   </SyntaxHighlighter>
-                                </div>
+                                </ResizableContainer>
                               </div>
                               <div className="p-4 bg-black/40">
-                                <h3 className="text-[10px] font-bold text-purple-500/80 uppercase tracking-widest mb-2 flex items-center gap-2">
-                                  <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
-                                  Incoming_Response
-                                </h3>
-                                <div className="rounded-md border border-gray-800 bg-gray-950 overflow-hidden debug-scrollbar">
+                                <div className="flex justify-between items-center mb-2">
+                                  <h3 className="text-[10px] font-bold text-purple-500/80 uppercase tracking-widest flex items-center gap-2">
+                                    <div className="w-1.5 h-1.5 rounded-full bg-purple-500 shadow-[0_0_8px_rgba(168,85,247,0.5)]" />
+                                    Incoming_Response
+                                  </h3>
+                                  <CopyButton content={formatJson(log.response)} />
+                                </div>
+                                <ResizableContainer>
                                   <SyntaxHighlighter
                                     language="json"
                                     style={customStyle as any}
                                     customStyle={{ margin: 0, background: 'transparent' }}
+                                    className="debug-scrollbar"
                                   >
                                     {formatJson(log.response)}
                                   </SyntaxHighlighter>
-                                </div>
+                                </ResizableContainer>
                               </div>
                             </div>
                           </motion.div>
