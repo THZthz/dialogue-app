@@ -11,14 +11,42 @@ import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { updateWorldState } from "../services/tools/updateWorldState.js";
 import { addDialogueStep } from "../services/tools/addDialogueStep.js";
 
-const deepseekModel = process.env.DEEPSEEK_API_KEY ? createDeepSeek({ apiKey: process.env.DEEPSEEK_API_KEY })('deepseek-chat') : null;
-const googleModel = process.env.GEMINI_API_KEY ? createGoogleGenerativeAI({ apiKey: process.env.GEMINI_API_KEY })('gemini-2.5-pro') : null;
+let googleModelInstance: LanguageModel | null = null;
+let deepseekModelInstance: LanguageModel | null = null;
+
+function getGoogleModel(): LanguageModel | null {
+  if (!googleModelInstance && process.env.GEMINI_API_KEY) {
+    try {
+      googleModelInstance = createGoogleGenerativeAI({
+        apiKey: process.env.GEMINI_API_KEY,
+      })('gemini-1.5-pro');
+    } catch (e) {
+      console.error("Failed to initialize Google model:", e);
+    }
+  }
+  return googleModelInstance;
+}
+
+function getDeepSeekModel(): LanguageModel | null {
+  if (!deepseekModelInstance && process.env.DEEPSEEK_API_KEY) {
+    try {
+      deepseekModelInstance = createDeepSeek({
+        apiKey: process.env.DEEPSEEK_API_KEY,
+      })('deepseek-chat');
+    } catch (e) {
+      console.error("Failed to initialize DeepSeek model:", e);
+    }
+  }
+  return deepseekModelInstance;
+}
 
 // The preferred model is Google if we are running in AI Studio with GEMINI_API_KEY, fallback to deepseek
 function getModel(): LanguageModel {
-  const m = googleModel || deepseekModel;
+  const m = getGoogleModel() || getDeepSeekModel();
   if (!m) {
-    throw new Error("Neither GEMINI_API_KEY nor DEEPSEEK_API_KEY is available in process.env.");
+    throw new Error(
+      "Missing API Key: Please set GEMINI_API_KEY or DEEPSEEK_API_KEY in the application settings or .env file."
+    );
   }
   return m;
 }
