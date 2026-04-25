@@ -9,6 +9,7 @@ import { getAllEntities, updateEntity } from "./worldModel.js";
 import { getAllPlots, addPlot, updatePlotStatus } from "./plotModel.js";
 import { updateWorldState } from "../services/tools/updateWorldState.js";
 import { addDialogueStep } from "../services/tools/addDialogueStep.js";
+import { updatePlotStatusTool, addPlotTool } from "../services/tools/plotTools.js";
 
 let googleModelInstance: LanguageModel | null = null;
 let deepseekModelInstance: LanguageModel | null = null;
@@ -51,23 +52,6 @@ function getModel(): LanguageModel {
   }
   return m;
 }
-
-const updatePlotStatusTool = tool({
-  description: "Update the status of an existing plot (e.g. to IN_PROGRESS or RESOLVED)",
-  inputSchema: z.object({
-    id: z.string(),
-    status: z.enum(['PENDING', 'IN_PROGRESS', 'RESOLVED'])
-  })
-});
-
-const addPlotTool = tool({
-  description: "Introduce a new concrete plot in a new location, specifying a clear trigger condition.",
-  inputSchema: z.object({
-    title: z.string(),
-    description: z.string(),
-    triggerCondition: z.string()
-  })
-});
 
 export async function generateAIResponse(
   userInput: string,
@@ -117,7 +101,6 @@ export async function generateAIResponse(
   `;
 
   let finalResponse: any = null;
-  const accumulatedWorldUpdates: any[] = [];
 
   const result = await generateText({
     model: getModel(),
@@ -138,11 +121,10 @@ export async function generateAIResponse(
         if (payload && payload.updates) {
           for (const u of payload.updates) {
             updateEntity(u);
-            accumulatedWorldUpdates.push(u);
           }
         }
       } else if (call.toolName === 'addDialogueStep') {
-        finalResponse = { ...(call as any).args, worldUpdates: [] };
+        finalResponse = { ...(call as any).args };
       } else if (call.toolName === 'updatePlotStatus') {
         const payload = (call as any).args;
         updatePlotStatus(payload.id, payload.status);
@@ -172,6 +154,6 @@ export async function generateAIResponse(
     }
   }
 
-  finalResponse.worldUpdates = accumulatedWorldUpdates;
   return finalResponse;
 }
+

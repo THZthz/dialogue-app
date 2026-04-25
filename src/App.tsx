@@ -59,23 +59,21 @@ export default function App() {
 
   // Helper to apply AI response
   const handleAIResponse = async (response: AIResponse) => {
-    // 1. Update World
-    response.worldUpdates?.forEach(update => {
-      worldManager.updateEntity(update as any);
-    });
-
-    // 2. Display Messages
+    // 1. Display Messages
     const aiMessages: Message[] = response.messages.map((m, i) => ({
       ...m,
       id: `ai-${Date.now()}-${i}`
     }));
     await displayMessages(aiMessages);
 
-    // 3. Set Options
+    // 2. Set Options
     const newOptions: DialogueOption[] = response.options.map(opt => ({
       ...opt
     }));
     setDynamicOptions(newOptions);
+
+    // 3. Refresh World State (since tool calls on backend might have updated it)
+    await worldManager.loadState();
   };
 
   // Auto-scroll to bottom

@@ -12,13 +12,6 @@ export interface AIResponse extends Omit<DialogueStep, 'messages'> {
       success: boolean;
     };
   }[];
-  worldUpdates: {
-    id: string;
-    longDescription?: string;
-    shortDescription?: string;
-    attributes?: Record<string, string>;
-    opinions?: Record<string, string>;
-  }[];
 }
 
 class AIService {
