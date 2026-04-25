@@ -1,8 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug, GripHorizontal, Copy, Check } from 'lucide-react';
-import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
-import { vscDarkPlus } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 interface LlmLog {
   id: string;
@@ -55,6 +53,132 @@ const ResizableContainer: React.FC<{
       >
         <div className={`w-8 h-1 rounded-full transition-colors ${isResizing ? 'bg-blue-400' : 'bg-gray-800 group-hover/resizable:bg-gray-700'}`} />
       </div>
+    </div>
+  );
+};
+
+const JsonNode: React.FC<{
+  label?: string;
+  value: any;
+  depth: number;
+  isLast?: boolean;
+}> = ({ label, value, depth, isLast = true }) => {
+  const [isExpanded, setIsExpanded] = useState(depth < 1);
+  const hasChildren = value !== null && typeof value === 'object';
+  const isEmpty = hasChildren && (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0);
+
+  const renderValue = () => {
+    if (value === null) return <span className="text-gray-500">null</span>;
+    if (typeof value === 'string') return <span className="text-emerald-400">"{value}"</span>;
+    if (typeof value === 'number') return <span className="text-amber-400">{value}</span>;
+    if (typeof value === 'boolean') return <span className="text-purple-400 font-bold">{value.toString()}</span>;
+    
+    if (Array.isArray(value)) {
+       if (isEmpty) return <span className="text-gray-600">[]</span>;
+       
+       return isExpanded ? (
+         <span>
+           <span className="text-gray-500">[</span>
+           <div className="pl-4 border-l border-gray-800/50 ml-1.5 my-0.5">
+             {value.map((v, i) => (
+               <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
+             ))}
+           </div>
+           <span className="text-gray-500">]</span>
+         </span>
+       ) : (
+         <button 
+          onClick={() => setIsExpanded(true)}
+          className="text-gray-500 hover:text-blue-400 bg-gray-800/30 px-1 rounded transition-colors text-[10px]"
+         >
+           [{value.length} items]
+         </button>
+       );
+    }
+    
+    // Object
+    if (isEmpty) return <span className="text-gray-600">{"{}"}</span>;
+
+    return isExpanded ? (
+      <span>
+        <span className="text-gray-500">{"{"}</span>
+        <div className="pl-4 border-l border-gray-800/50 ml-1.5 my-0.5">
+          {Object.entries(value).map(([k, v], i, arr) => (
+            <JsonNode key={k} label={k} value={v} depth={depth + 1} isLast={i === arr.length - 1} />
+          ))}
+        </div>
+        <span className="text-gray-500">{"}"}</span>
+      </span>
+    ) : (
+      <button 
+        onClick={() => setIsExpanded(true)}
+        className="text-gray-500 hover:text-blue-400 bg-gray-800/30 px-1 rounded transition-colors text-[10px]"
+      >
+        {"{ " + Object.keys(value).slice(0, 2).join(', ') + (Object.keys(value).length > 2 ? '...' : '') + " }"}
+      </button>
+    );
+  };
+
+  return (
+    <div className="font-mono text-[11px] leading-relaxed group/node">
+      <div className="flex items-start">
+        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
+          {hasChildren && !isEmpty && (
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`text-gray-500 hover:text-blue-400 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
+            >
+              <ChevronDown size={12} />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          {label && (
+            <span className="text-sky-400 mr-2 group-hover/node:text-sky-300 transition-colors">
+              <span className="opacity-50">"</span>{label}<span className="opacity-50">"</span>
+              <span className="text-gray-600 ml-1">:</span>
+            </span>
+          )}
+          {renderValue()}
+          {!isLast && <span className="text-gray-600">,</span>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
+  const [parsed, setParsed] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!data) return;
+    try {
+      setParsed(JSON.parse(data));
+      setError(null);
+    } catch (e) {
+      setError(data);
+    }
+  }, [data]);
+
+  if (!data) return <div className="p-4 text-gray-600 italic text-xs">Empty Transmission</div>;
+  
+  if (error) {
+    return (
+      <div className="p-3 h-full overflow-auto debug-scrollbar bg-black/40">
+        <pre className="text-red-400/80 text-[11px] font-mono whitespace-pre-wrap leading-relaxed">
+          {error}
+        </pre>
+      </div>
+    );
+  }
+
+  if (!parsed) return null;
+
+  return (
+    <div className="p-3 h-full overflow-auto debug-scrollbar bg-black/20">
+      <JsonNode value={parsed} depth={0} />
     </div>
   );
 };
@@ -132,23 +256,6 @@ export const DebugPanel: React.FC = () => {
       return JSON.stringify(JSON.parse(jsonStr), null, 2);
     } catch (e) {
       return jsonStr;
-    }
-  };
-
-  const customStyle = {
-    ...vscDarkPlus,
-    'pre[class*="language-"]': {
-      ...vscDarkPlus['pre[class*="language-"]'],
-      margin: 0,
-      padding: '0.75rem',
-      backgroundColor: 'transparent',
-      fontSize: '11px',
-      height: '100%',
-      overflow: 'auto',
-    },
-    'code[class*="language-"]': {
-      ...vscDarkPlus['code[class*="language-"]'],
-      fontSize: '11px',
     }
   };
 
@@ -261,14 +368,7 @@ export const DebugPanel: React.FC = () => {
                                   <CopyButton content={formatJson(log.request)} />
                                 </div>
                                 <ResizableContainer>
-                                  <SyntaxHighlighter
-                                    language="json"
-                                    style={customStyle as any}
-                                    customStyle={{ margin: 0, background: 'transparent' }}
-                                    className="debug-scrollbar"
-                                  >
-                                    {formatJson(log.request)}
-                                  </SyntaxHighlighter>
+                                  <JsonExplorer data={log.request} />
                                 </ResizableContainer>
                               </div>
                               <div className="p-4 bg-black/40">
@@ -280,14 +380,7 @@ export const DebugPanel: React.FC = () => {
                                   <CopyButton content={formatJson(log.response)} />
                                 </div>
                                 <ResizableContainer>
-                                  <SyntaxHighlighter
-                                    language="json"
-                                    style={customStyle as any}
-                                    customStyle={{ margin: 0, background: 'transparent' }}
-                                    className="debug-scrollbar"
-                                  >
-                                    {formatJson(log.response)}
-                                  </SyntaxHighlighter>
+                                  <JsonExplorer data={log.response} />
                                 </ResizableContainer>
                               </div>
                             </div>
