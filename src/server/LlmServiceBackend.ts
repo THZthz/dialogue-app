@@ -22,7 +22,7 @@ function getGoogleModel(): LanguageModel | null {
     try {
       googleModelInstance = createGoogleGenerativeAI({
         apiKey: process.env.GEMINI_API_KEY,
-      })('gemini-3.1-flash-lie-preview');
+      })('gemini-3.1-flash-lite-preview');
     } catch (e) {
       console.error("Failed to initialize Google model:", e);
     }
@@ -48,7 +48,7 @@ function getDeepSeekModel(): LanguageModel | null {
 // The preferred model is Google if we are running in AI Studio with GEMINI_API_KEY, fallback to deepseek
 function getModelInfo(): { model: LanguageModel; name: string } {
   const google = getGoogleModel();
-  if (google) return { model: google, name: 'gemini-3.1-flash-lie-preview' };
+  if (google) return { model: google, name: 'gemini-3.1-flash-lite-preview' };
   
   const deepseek = getDeepSeekModel();
   if (deepseek) return { model: deepseek, name: 'deepseek-chat' };
@@ -119,10 +119,16 @@ export async function generateAIResponse(
 
   const startTime = Date.now();
   const logId = addLlmLog({
+    model: modelName,
     system: systemInstruction,
     prompt: promptText,
-    model: modelName,
-    tools: Object.keys(tools)
+    userInput,
+    history: history,
+    tools: Object.entries(tools).map(([name, t]: [string, any]) => ({
+      name,
+      description: t.description,
+      parameters: t.parameters || t.inputSchema?.shape || t.inputSchema
+    }))
   });
 
   try {

@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Maintenance**: Fixed model name typo (`gemini-3.1-flash-lite-preview`).
+- **Feature**: Enhanced LLM request logging.
+  - Expanded `addLlmLog` payload to include full tool definitions (schemas), user input, and complete conversation history.
+  - Ensured no simplification of debug data occurs during transmission.
 - **Feature**: Added a full-stack LLM debug system.
   - Implemented `llm_logs` SQLite table for persistent request/response tracking.
   - Created `/api/debug/logs` endpoints to fetch and manage performance/interaction data.
