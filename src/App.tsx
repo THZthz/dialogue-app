@@ -11,6 +11,7 @@ import { DialogueOptions } from '@/components/DialogueOptions';
 import { TypingIndicator } from '@/components/TypingIndicator';
 import { DiceRoller } from '@/components/DiceRoller';
 import { CharacterPanel } from '@/components/CharacterPanel';
+import { DebugPanel } from '@/components/DebugPanel';
 import { motion, AnimatePresence, LayoutGroup, useScroll, useTransform } from 'motion/react';
 
 import { aiService, AIResponse } from '@/services/LlmService';
@@ -403,7 +404,8 @@ export default function App() {
         </div>
       </main>
 
-      {/* Side indicators (Electron app aesthetic) */}
+      {/* Indicator for App State */}
+      <DebugPanel />
       <div className="fixed left-0 top-0 bottom-0 w-2 bg-gradient-to-r from-black/50 to-transparent" />
       <div className="fixed right-0 top-0 bottom-0 w-2 bg-gradient-to-l from-black/50 to-transparent" />
     </div>

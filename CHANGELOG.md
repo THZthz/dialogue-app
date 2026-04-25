@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Feature**: Added a full-stack LLM debug system.
+  - Implemented `llm_logs` SQLite table for persistent request/response tracking.
+  - Created `/api/debug/logs` endpoints to fetch and manage performance/interaction data.
+  - Added `DebugPanel` UI component with real-time log viewing, JSON formatting, and error highlighting.
 - **Documentation**: Corrected file paths (`datebase.ts`, `models/`, `tools/`) in `DEVELOPER.md` structure map.
 - **Documentation**: Updated `DEVELOPER.md` with a comprehensive project structure breakdown, including detailed descriptions for key directories and files to improve onboarding and codebase navigation.
 - **Project Maintenance**: Moved maintenance log from `DEVELOPER.md` to `CHANGELOG.md`.

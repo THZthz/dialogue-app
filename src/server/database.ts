@@ -43,6 +43,15 @@ db.exec(`
     key TEXT PRIMARY KEY,
     value TEXT NOT NULL
   );
+
+  CREATE TABLE IF NOT EXISTS llm_logs (
+    id TEXT PRIMARY KEY,
+    timestamp DATETIME DEFAULT CURRENT_TIMESTAMP,
+    request TEXT NOT NULL,
+    response TEXT,
+    duration INTEGER,
+    status TEXT
+  );
 `);
 
 export default db;

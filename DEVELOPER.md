@@ -117,6 +117,10 @@ Dialogue messages support interactive object links using a custom markdown-like 
 - **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
 - **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prefers **Gemini 1.5/2.0** models (via Google Generative AI provider) and falls back to **DeepSeek-V3**. The system utilizes tool calling (function calling) to perform world updates, plot transitions, and generate narrative dialogue steps.
 - **LlmService (`src/services/LlmService.ts`)**: A frontend client wrapper that proxies requests to the backend `/api/chat` route.
+- **Debug System**:
+  - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
+  - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
+  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A frontend component (toggled via a bug icon at the bottom right) that displays a chronological history of LLM requests (system instructions, prompts) and responses (text, tool calls, raw JSON).
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 

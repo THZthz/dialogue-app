@@ -3,6 +3,7 @@ import { generateAIResponse } from "@/server/LlmServiceBackend";
 import { getAllEntities, seedDatabase } from "@/server/models/world";
 import { getHistory, addMessage, clearHistory } from "@/server/models/history";
 import { getAllPlots } from "@/server/models/plot";
+import { getLlmLogs, clearLlmLogs } from "@/server/models/debug";
 
 const apiRouter = express.Router();
 
@@ -19,6 +20,15 @@ apiRouter.get("/plots", (req, res) => {
 
 apiRouter.get("/history", (req, res) => {
   res.json(getHistory());
+});
+
+apiRouter.get("/debug/logs", (req, res) => {
+  res.json(getLlmLogs());
+});
+
+apiRouter.post("/debug/logs/clear", (req, res) => {
+  clearLlmLogs();
+  res.json({ success: true });
 });
 
 apiRouter.post("/reset", (req, res) => {

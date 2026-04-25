@@ -12,6 +12,7 @@ import { updateWorldStateTool } from "@/services/tools/updateWorldState";
 import { addDialogueStepTool } from "@/services/tools/addDialogueStep";
 import { addPlotTool } from "@/services/tools/addPlot";
 import { updatePlotStatusTool } from "@/services/tools/updatePlotStatus";
+import { addLlmLog, updateLlmLog } from "@/server/models/debug";
 
 let googleModelInstance: LanguageModel | null = null;
 let deepseekModelInstance: LanguageModel | null = null;
@@ -45,14 +46,16 @@ function getDeepSeekModel(): LanguageModel | null {
 }
 
 // The preferred model is Google if we are running in AI Studio with GEMINI_API_KEY, fallback to deepseek
-function getModel(): LanguageModel {
-  const m = getGoogleModel() || getDeepSeekModel();
-  if (!m) {
-    throw new Error(
-      "Missing API Key: Please set GEMINI_API_KEY or DEEPSEEK_API_KEY in the application settings or .env file."
-    );
-  }
-  return m;
+function getModelInfo(): { model: LanguageModel; name: string } {
+  const google = getGoogleModel();
+  if (google) return { model: google, name: 'gemini-3.1-flash-lie-preview' };
+  
+  const deepseek = getDeepSeekModel();
+  if (deepseek) return { model: deepseek, name: 'deepseek-chat' };
+  
+  throw new Error(
+    "Missing API Key: Please set GEMINI_API_KEY or DEEPSEEK_API_KEY in the application settings or .env file."
+  );
 }
 
 export async function generateAIResponse(
@@ -104,19 +107,36 @@ export async function generateAIResponse(
 
   let finalResponse: any = null;
 
-  const result = await generateText({
-    model: getModel(),
+  const promptText = `The player says: "${userInput}". Process the turn.`;
+  const tools = {
+    updateWorldState: updateWorldStateTool,
+    addDialogueStep: addDialogueStepTool,
+    updatePlotStatus: updatePlotStatusTool,
+    addPlot: addPlotTool
+  };
+
+  const { model, name: modelName } = getModelInfo();
+
+  const startTime = Date.now();
+  const logId = addLlmLog({
     system: systemInstruction,
-    prompt: `The player says: "${userInput}". Process the turn.`,
-    tools: {
-      updateWorldState: updateWorldStateTool,
-      addDialogueStep: addDialogueStepTool,
-      updatePlotStatus: updatePlotStatusTool,
-      addPlot: addPlotTool
-    }
+    prompt: promptText,
+    model: modelName,
+    tools: Object.keys(tools)
   });
 
-  if (result.toolCalls) {
+  try {
+    const result = await generateText({
+      model,
+      system: systemInstruction,
+      prompt: promptText,
+      tools
+    });
+
+    const duration = Date.now() - startTime;
+    updateLlmLog(logId, result, duration, 'SUCCESS');
+
+    if (result.toolCalls) {
     for (const call of result.toolCalls) {
       if (call.toolName === 'updateWorldState') {
         const payload = (call as any).args;
@@ -157,5 +177,10 @@ export async function generateAIResponse(
   }
 
   return finalResponse;
+  } catch (error: any) {
+    const duration = Date.now() - startTime;
+    updateLlmLog(logId, { error: error.message, stack: error.stack }, duration, 'ERROR');
+    throw error;
+  }
 }
 
