@@ -3,6 +3,9 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Refactor**: Improved `DebugPanel.tsx` internal structure.
+  - Extracted the "Logs" tab logic into a dedicated `LlmTraceViewer` component.
+  - Encapsulated log-specific state (`logs`, `expandedId`, `isLoading`) and synchronization functions (`fetchLogs`, `clearLogs`) within the sub-component for better maintainability.
 - **Design Enhancement**: Re-styled `JsonExplorer` to a high-contrast **One Dark Darker** theme.
   - Set background to `#181a1f` and optimized tree colors (Red/Green/Orange/Purple) for maximum readability.
 - **Feature**: Upgraded Debug Panel JSON Editors.

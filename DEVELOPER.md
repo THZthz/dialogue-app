@@ -122,10 +122,10 @@ Dialogue messages support interactive object links using a custom markdown-like 
 - **Debug System**:
   - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
   - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
-  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management.
-    - **Logs**: Displays chronological LLM interactions with a read-only CodeMirror viewer for code blocks and a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads.
-    - **History**: Advanced JSON editor (via CodeMirror) for synchronizing the dialogue message buffer with schema validation.
-    - **World**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation.
+  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management. The layout is modularized into dedicated sub-components within the file:
+    - **Logs (`LlmTraceViewer`)**: Displays chronological LLM interactions with a read-only CodeMirror viewer for code blocks and a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads.
+    - **History (`HistoryEditor`)**: Advanced JSON editor (via CodeMirror) for synchronizing the dialogue message buffer with schema validation.
+    - **World (`WorldEditor`)**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 

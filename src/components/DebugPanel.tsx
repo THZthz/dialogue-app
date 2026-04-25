@@ -1,8 +1,8 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
-import { 
-  Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug, 
-  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle 
+import {
+  Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug,
+  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle
 } from 'lucide-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
@@ -50,14 +50,14 @@ const ResizableContainer: React.FC<{
   }, [height]);
 
   return (
-    <div 
+    <div
       className={`relative rounded-sm border border-white/5 bg-[#0b0c0e] flex flex-col group/resizable overflow-hidden ${className}`}
       style={{ height: `${height}px` }}
     >
       <div className="flex-1 min-h-0 relative">
         {children}
       </div>
-      <div 
+      <div
         onMouseDown={startResizing}
         className={`h-2 w-full flex items-center justify-center cursor-ns-resize hover:bg-white/5 active:bg-white/10 transition-colors border-t border-white/5 flex-shrink-0 relative z-10 ${isResizing ? 'bg-white/10' : ''}`}
       >
@@ -74,7 +74,7 @@ const MESSAGE_SCHEMA = {
     properties: {
       id: { type: 'string', description: 'Unique identifier for the message' },
       speaker: { type: 'string', description: 'Name of the entity speaking' },
-      type: { 
+      type: {
         enum: ['YOU', 'INNER_VOICE', 'CHARACTER', 'SYSTEM', 'ROLL', 'NOTIFICATION'],
         description: 'Style/category of the message'
       },
@@ -189,30 +189,30 @@ const JsonNode: React.FC<{
     if (typeof value === 'string') return <span className="text-[#98c379]">"{value}"</span>;
     if (typeof value === 'number') return <span className="text-[#d19a66]">{value}</span>;
     if (typeof value === 'boolean') return <span className="text-[#c678dd] font-bold">{value.toString()}</span>;
-    
+
     if (Array.isArray(value)) {
-       if (isEmpty) return <span className="text-[#abb2bf]/20">[]</span>;
-       
-       return isExpanded ? (
-          <span>
-           <span className="text-[#abb2bf]/70">[</span>
-           <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
-             {value.map((v, i) => (
-               <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
-             ))}
-           </div>
-           <span className="text-[#abb2bf]/70">]</span>
-         </span>
-       ) : (
-         <button 
+      if (isEmpty) return <span className="text-[#abb2bf]/20">[]</span>;
+
+      return isExpanded ? (
+        <span>
+          <span className="text-[#abb2bf]/70">[</span>
+          <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
+            {value.map((v, i) => (
+              <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
+            ))}
+          </div>
+          <span className="text-[#abb2bf]/70">]</span>
+        </span>
+      ) : (
+        <button
           onClick={() => setIsExpanded(true)}
           className="text-[#5c6370] hover:text-[#61afef] bg-white/[0.03] px-1 rounded transition-colors text-[10px]"
-         >
-           [{value.length} items]
-         </button>
-       );
+        >
+          [{value.length} items]
+        </button>
+      );
     }
-    
+
     // Object
     if (isEmpty) return <span className="text-[#abb2bf]/20">{"{}"}</span>;
 
@@ -227,7 +227,7 @@ const JsonNode: React.FC<{
         <span className="text-[#abb2bf]/70">{"}"}</span>
       </span>
     ) : (
-      <button 
+      <button
         onClick={() => setIsExpanded(true)}
         className="text-[#5c6370] hover:text-[#61afef] bg-white/[0.03] px-1 rounded transition-colors text-[10px]"
       >
@@ -241,7 +241,7 @@ const JsonNode: React.FC<{
       <div className="flex items-start">
         <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
           {hasChildren && !isEmpty && (
-            <button 
+            <button
               onClick={() => setIsExpanded(!isExpanded)}
               className={`text-gray-500 hover:text-blue-400 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
             >
@@ -249,7 +249,7 @@ const JsonNode: React.FC<{
             </button>
           )}
         </div>
-        
+
         <div className="flex-1 min-w-0">
           {label && (
             <span className="text-[#e06c75] mr-2 group-hover/node:text-[#e06c75] transition-colors">
@@ -280,7 +280,7 @@ const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
   }, [data]);
 
   if (!data) return <div className="p-4 text-white/30 italic text-[10px] uppercase tracking-widest">Empty_Transmission</div>;
-  
+
   if (error) {
     return (
       <div className="p-3 h-full overflow-auto debug-scrollbar bg-transparent">
@@ -316,11 +316,10 @@ const CopyButton: React.FC<{ content: string }> = ({ content }) => {
   return (
     <button
       onClick={handleCopy}
-      className={`p-1 flex items-center gap-1.5 transition-all ${
-        copied 
-          ? 'text-[#a3c2a3]' 
-          : 'text-white/40 hover:text-white'
-      }`}
+      className={`p-1 flex items-center gap-1.5 transition-all ${copied
+        ? 'text-[#a3c2a3]'
+        : 'text-white/40 hover:text-white'
+        }`}
       title={copied ? "Copied!" : "Copy to clipboard"}
     >
       {copied ? <Check size={12} /> : <Copy size={12} />}
@@ -329,6 +328,161 @@ const CopyButton: React.FC<{ content: string }> = ({ content }) => {
       </span>
     </button>
   );
+};
+
+const LlmTraceViewer: React.FC = () => {
+  const [logs, setLogs] = useState<LlmLog[]>([]);
+  const [expandedId, setExpandedId] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const fetchLogs = async () => {
+    setIsLoading(true);
+    try {
+      const response = await fetch('/api/debug/logs');
+      if (response.ok) {
+        const data = await response.json();
+        setLogs(data);
+      }
+    } catch (error) {
+      console.error("Failed to fetch logs:", error);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const clearLogs = async () => {
+    try {
+      await fetch('/api/debug/logs/clear', { method: 'POST' });
+      setLogs([]);
+    } catch (error) {
+      console.error("Failed to clear logs:", error);
+    }
+  };
+
+  useEffect(() => {
+    fetchLogs();
+  }, []);
+
+  const formatJson = (jsonStr: string | null) => {
+    if (!jsonStr) return 'N/A';
+    try {
+      return JSON.stringify(JSON.parse(jsonStr), null, 2);
+    } catch (e) {
+      return jsonStr;
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between h-9 mb-6 flex-shrink-0">
+        <div className="flex items-center gap-2 text-white/60">
+          <Terminal size={16} />
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">LLM_TRACE</h3>
+        </div>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={fetchLogs}
+            disabled={isLoading}
+            className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white rounded-sm border border-white/10 transition-all disabled:opacity-50"
+          >
+            <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Refresh</span>
+          </button>
+          <button
+            onClick={clearLogs}
+            className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white/40 hover:bg-red-500/20 hover:text-red-400 rounded-sm border border-white/5 hover:border-red-500/20 transition-all"
+          >
+            <Trash2 size={14} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Clear</span>
+          </button>
+        </div>
+      </div>
+      <div className="flex-1 space-y-4 overflow-y-auto debug-scrollbar pr-1">
+        {logs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-white/10 py-20 grayscale opacity-50">
+            <Bug size={48} className="mb-4" />
+            <p className="uppercase tracking-[0.3em] text-[10px] font-bold">Awaiting_Transmission...</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            {logs.map((log) => (
+              <div
+                key={log.id}
+                className={`border rounded-sm overflow-hidden transition-all duration-300 ${expandedId === log.id
+                  ? 'border-white/[0.15] bg-white/[0.03]'
+                  : 'border-white/5 hover:border-white/[0.08] bg-white/[0.015]'
+                  }`}
+              >
+                <button
+                  onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
+                  className="w-full text-left p-4 flex items-center justify-between gap-4 group"
+                >
+                  <div className="flex items-center gap-4 min-w-0">
+                    <div className={`transition-transform duration-300 ${expandedId === log.id ? 'rotate-0' : '-rotate-90 opacity-40'}`}>
+                      <ChevronDown size={14} />
+                    </div>
+                    <span className={`px-2 py-0.5 rounded-sm text-[9px] font-bold tracking-widest uppercase border ${log.status === 'ERROR' ? 'bg-red-500/5 text-red-400 border-red-500/20' : 'bg-white/5 text-white/60 border-white/10'
+                      }`}>
+                      {log.status}
+                    </span>
+                    <span className="text-white/30 font-mono text-[10px] tabular-nums tracking-widest">
+                      {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </span>
+                  </div>
+                  <div className="flex items-center gap-2 font-mono text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">
+                    <span className="tracking-widest">
+                      {log.duration}ms
+                    </span>
+                  </div>
+                </button>
+
+                <AnimatePresence>
+                  {expandedId === log.id && (
+                    <motion.div
+                      initial={{ height: 0, opacity: 0 }}
+                      animate={{ height: 'auto', opacity: 1 }}
+                      exit={{ height: 0, opacity: 0 }}
+                      transition={{ duration: 0.3 }}
+                      className="overflow-hidden border-t border-white/10"
+                    >
+                      <div className="divide-y divide-white/[0.03]">
+                        <div className="p-5 bg-[#0b0c0e]">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
+                              <div className="w-[1px] h-3 bg-[#e06c75]" />
+                              Outgoing_Request
+                            </h3>
+                            <CopyButton content={formatJson(log.request)} />
+                          </div>
+                          <ResizableContainer>
+                            <JsonExplorer data={log.request} />
+                          </ResizableContainer>
+                        </div>
+                        <div className="p-5 bg-[#0a0a0c]">
+                          <div className="flex justify-between items-center mb-4">
+                            <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
+                              <div className="w-[1px] h-3 bg-[#98c379]" />
+                              Incoming_Response
+                            </h3>
+                            <CopyButton content={formatJson(log.response)} />
+                          </div>
+                          <ResizableContainer>
+                            <JsonExplorer data={log.response} />
+                          </ResizableContainer>
+                        </div>
+                      </div>
+                    </motion.div>
+                  )}
+                </AnimatePresence>
+              </div>
+            ))}
+            <div className="pt-12 text-center opacity-10 uppercase tracking-[0.4em] font-bold text-[9px]">
+              [ END_OF_LOG_STREAM ]
+            </div>
+          </div>
+        )}
+      </div>
+    </div>);
 };
 
 const HistoryEditor: React.FC = () => {
@@ -487,11 +641,10 @@ const WorldEditor: React.FC = () => {
             <button
               key={entity.id}
               onClick={() => selectEntity(entity)}
-              className={`w-full text-left p-3 rounded-sm text-[11px] transition-all border ${
-                selectedEntityId === entity.id 
-                  ? 'bg-white/10 border-white/30 text-white' 
-                  : 'bg-white/2 border-transparent text-white/40 hover:bg-white/5 hover:text-white/60'
-              }`}
+              className={`w-full text-left p-3 rounded-sm text-[11px] transition-all border ${selectedEntityId === entity.id
+                ? 'bg-white/10 border-white/30 text-white'
+                : 'bg-white/2 border-transparent text-white/40 hover:bg-white/5 hover:text-white/60'
+                }`}
             >
               <div className="font-bold flex items-center justify-between">
                 <span className="truncate mr-2">{entity.displayName}</span>
@@ -577,62 +730,18 @@ const WorldEditor: React.FC = () => {
 export const DebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
   const [activeTab, setActiveTab] = useState<'logs' | 'history' | 'world'>('logs');
-  const [logs, setLogs] = useState<LlmLog[]>([]);
-  const [expandedId, setExpandedId] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
 
-  const fetchLogs = async () => {
-    if (activeTab !== 'logs') return;
-    setIsLoading(true);
-    try {
-      const response = await fetch('/api/debug/logs');
-      if (response.ok) {
-        const data = await response.json();
-        setLogs(data);
-      }
-    } catch (error) {
-      console.error("Failed to fetch logs:", error);
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const clearLogs = async () => {
-    try {
-      await fetch('/api/debug/logs/clear', { method: 'POST' });
-      setLogs([]);
-    } catch (error) {
-      console.error("Failed to clear logs:", error);
-    }
-  };
-
-  useEffect(() => {
-    if (isOpen && activeTab === 'logs') {
-      fetchLogs();
-    }
-  }, [isOpen, activeTab]);
-
-  const formatJson = (jsonStr: string | null) => {
-    if (!jsonStr) return 'N/A';
-    try {
-      return JSON.stringify(JSON.parse(jsonStr), null, 2);
-    } catch (e) {
-      return jsonStr;
-    }
-  };
-
-  const TabButton: React.FC<{ 
-    id: 'logs' | 'history' | 'world', 
-    label: string, 
-    icon: React.ReactNode 
+  const TabButton: React.FC<{
+    id: 'logs' | 'history' | 'world',
+    label: string,
+    icon: React.ReactNode
   }> = ({ id, label, icon }) => (
     <button
       onClick={() => setActiveTab(id)}
-      className={`px-4 py-3 flex items-center gap-2 border-b transition-all ${
-        activeTab === id 
-          ? 'border-white text-white bg-white/5' 
-          : 'border-transparent text-white/30 hover:text-white/60 hover:bg-white/2'
-      }`}
+      className={`px-4 py-3 flex items-center gap-2 border-b transition-all ${activeTab === id
+        ? 'border-white text-white bg-white/5'
+        : 'border-transparent text-white/30 hover:text-white/60 hover:bg-white/2'
+        }`}
     >
       {icon}
       <span className="text-[10px] font-bold uppercase tracking-[0.2em]">{label}</span>
@@ -676,121 +785,7 @@ export const DebugPanel: React.FC = () => {
             </div>
 
             <div className="flex-1 p-6 min-h-0 flex flex-col">
-              {activeTab === 'logs' && (
-                <div className="flex flex-col h-full overflow-hidden">
-                  <div className="flex items-center justify-between h-9 mb-6 flex-shrink-0">
-                    <div className="flex items-center gap-2 text-white/60">
-                      <Terminal size={16} />
-                      <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">LLM_TRACE</h3>
-                    </div>
-                    <div className="flex items-center gap-3">
-                      <button
-                        onClick={fetchLogs}
-                        disabled={isLoading}
-                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white/60 hover:bg-white/10 hover:text-white rounded-sm border border-white/10 transition-all disabled:opacity-50"
-                      >
-                        <RefreshCw size={14} className={isLoading ? 'animate-spin' : ''} />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Refresh</span>
-                      </button>
-                      <button
-                        onClick={clearLogs}
-                        className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white/40 hover:bg-red-500/20 hover:text-red-400 rounded-sm border border-white/5 hover:border-red-500/20 transition-all"
-                      >
-                        <Trash2 size={14} />
-                        <span className="text-[10px] font-bold uppercase tracking-wider">Clear</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="flex-1 space-y-4 overflow-y-auto debug-scrollbar pr-1">
-                    {logs.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-full text-white/10 py-20 grayscale opacity-50">
-                      <Bug size={48} className="mb-4" />
-                      <p className="uppercase tracking-[0.3em] text-[10px] font-bold">Awaiting_Transmission...</p>
-                    </div>
-                  ) : (
-                    <div className="space-y-4">
-                      {logs.map((log) => (
-                        <div
-                          key={log.id}
-                          className={`border rounded-sm overflow-hidden transition-all duration-300 ${
-                            expandedId === log.id 
-                              ? 'border-white/[0.15] bg-white/[0.03]' 
-                              : 'border-white/5 hover:border-white/[0.08] bg-white/[0.015]'
-                          }`}
-                        >
-                          <button
-                            onClick={() => setExpandedId(expandedId === log.id ? null : log.id)}
-                            className="w-full text-left p-4 flex items-center justify-between gap-4 group"
-                          >
-                            <div className="flex items-center gap-4 min-w-0">
-                              <div className={`transition-transform duration-300 ${expandedId === log.id ? 'rotate-0' : '-rotate-90 opacity-40'}`}>
-                                <ChevronDown size={14} />
-                              </div>
-                              <span className={`px-2 py-0.5 rounded-sm text-[9px] font-bold tracking-widest uppercase border ${
-                                log.status === 'ERROR' ? 'bg-red-500/5 text-red-400 border-red-500/20' : 'bg-white/5 text-white/60 border-white/10'
-                              }`}>
-                                {log.status}
-                              </span>
-                              <span className="text-white/30 font-mono text-[10px] tabular-nums tracking-widest">
-                                {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
-                              </span>
-                            </div>
-                            <div className="flex items-center gap-2 font-mono text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">
-                              <span className="tracking-widest">
-                                {log.duration}ms
-                              </span>
-                            </div>
-                          </button>
-
-                          <AnimatePresence>
-                            {expandedId === log.id && (
-                              <motion.div
-                                initial={{ height: 0, opacity: 0 }}
-                                animate={{ height: 'auto', opacity: 1 }}
-                                exit={{ height: 0, opacity: 0 }}
-                                transition={{ duration: 0.3 }}
-                                className="overflow-hidden border-t border-white/10"
-                              >
-                                <div className="divide-y divide-white/[0.03]">
-                                  <div className="p-5 bg-[#0b0c0e]">
-                                    <div className="flex justify-between items-center mb-4">
-                                      <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
-                                        <div className="w-[1px] h-3 bg-[#e06c75]" />
-                                        Outgoing_Request
-                                      </h3>
-                                      <CopyButton content={formatJson(log.request)} />
-                                    </div>
-                                    <ResizableContainer>
-                                      <JsonExplorer data={log.request} />
-                                    </ResizableContainer>
-                                  </div>
-                                  <div className="p-5 bg-[#0a0a0c]">
-                                    <div className="flex justify-between items-center mb-4">
-                                      <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
-                                        <div className="w-[1px] h-3 bg-[#98c379]" />
-                                        Incoming_Response
-                                      </h3>
-                                      <CopyButton content={formatJson(log.response)} />
-                                    </div>
-                                    <ResizableContainer>
-                                      <JsonExplorer data={log.response} />
-                                    </ResizableContainer>
-                                  </div>
-                                </div>
-                              </motion.div>
-                            )}
-                          </AnimatePresence>
-                        </div>
-                      ))}
-                      <div className="pt-12 text-center opacity-10 uppercase tracking-[0.4em] font-bold text-[9px]">
-                        [ END_OF_LOG_STREAM ]
-                      </div>
-                    </div>
-                  )}
-                  </div>
-                </div>
-              )}
-
+              {activeTab === 'logs' && <LlmTraceViewer />}
               {activeTab === 'history' && <HistoryEditor />}
               {activeTab === 'world' && <WorldEditor />}
             </div>
