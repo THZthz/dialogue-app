@@ -1,4 +1,4 @@
-import { generateText, type LanguageModel, tool } from "ai";
+import { tool } from "ai";
 import { z } from "zod";
 
 // WARNING: Do not remove this comment! Keep schema in sync with "/types/dialogue.ts"!
@@ -36,7 +36,7 @@ const inputSchema = z.object({
   })).describe("Suggestions for the player's next move.")
 });
 
-export const addDialogueStep = tool({
+export const addDialogueStepTool = tool({
   title: "Add Dialogue Step",
   description: "Adds a new dialogue step with messages and options for the player. This tool call represents the end of your response.",
   inputSchema: inputSchema

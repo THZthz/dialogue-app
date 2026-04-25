@@ -1,5 +1,5 @@
-import db from "./db.js";
-import { WorldEntity, WorldState, Character, Location, WorldObject } from "../types/entities.js";
+import db from "@/server/database";
+import { WorldEntity, WorldState, Character, Location, WorldObject } from "@/types/entities";
 
 const initialObjects: Record<string, WorldObject> = {
   'rusted_coin': {

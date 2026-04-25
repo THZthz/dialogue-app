@@ -3,13 +3,15 @@ import { createDeepSeek } from "@ai-sdk/deepseek";
 import { createGoogleGenerativeAI } from "@ai-sdk/google";
 import { generateText, type LanguageModel, tool } from "ai";
 import { z } from "zod";
-import { WorldState } from "../types/entities.js";
-import { Message } from "../types/dialogue.js";
-import { getAllEntities, updateEntity } from "./worldModel.js";
-import { getAllPlots, addPlot, updatePlotStatus } from "./plotModel.js";
-import { updateWorldState } from "../services/tools/updateWorldState.js";
-import { addDialogueStep } from "../services/tools/addDialogueStep.js";
-import { updatePlotStatusTool, addPlotTool } from "../services/tools/plotTools.js";
+import { WorldState } from "@/types/entities";
+import { Message } from "@/types/dialogue";
+import { getAllEntities, updateEntity } from "@/server/models/world";
+import { getHistory, addMessage, clearHistory } from "@/server/models/history";
+import { getAllPlots, addPlot, updatePlotStatus } from "@/server/models/plot";
+import { updateWorldStateTool } from "@/services/tools/updateWorldState";
+import { addDialogueStepTool } from "@/services/tools/addDialogueStep";
+import { addPlotTool } from "@/services/tools/addPlot";
+import { updatePlotStatusTool } from "@/services/tools/updatePlotStatus";
 
 let googleModelInstance: LanguageModel | null = null;
 let deepseekModelInstance: LanguageModel | null = null;
@@ -107,8 +109,8 @@ export async function generateAIResponse(
     system: systemInstruction,
     prompt: `The player says: "${userInput}". Process the turn.`,
     tools: {
-      updateWorldState,
-      addDialogueStep,
+      updateWorldState: updateWorldStateTool,
+      addDialogueStep: addDialogueStepTool,
       updatePlotStatus: updatePlotStatusTool,
       addPlot: addPlotTool
     }

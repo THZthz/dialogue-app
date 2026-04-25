@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Documentation**: Corrected file paths (`datebase.ts`, `models/`, `tools/`) in `DEVELOPER.md` structure map.
 - **Documentation**: Updated `DEVELOPER.md` with a comprehensive project structure breakdown, including detailed descriptions for key directories and files to improve onboarding and codebase navigation.
 - **Project Maintenance**: Moved maintenance log from `DEVELOPER.md` to `CHANGELOG.md`.
 

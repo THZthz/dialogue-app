@@ -1,7 +1,7 @@
-import { generateText, type LanguageModel, tool } from "ai";
+import { tool } from "ai";
 import { z } from "zod";
 
-export const updateWorldState = tool({
+export const updateWorldStateTool = tool({
   title: "Update World State",
   description: "Updates the world state with new observations or character state changes. Call this to update opinions, descriptions, or attributes.",
   inputSchema: z.object({

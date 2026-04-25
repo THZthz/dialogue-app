@@ -1,8 +1,8 @@
 import express from "express";
-import { generateAIResponse } from "./LlmServiceBackend.js";
-import { getAllEntities, seedDatabase } from "./worldModel.js";
-import { getHistory, addMessage, clearHistory } from "./historyModel.js";
-import { getAllPlots } from "./plotModel.js";
+import { generateAIResponse } from "@/server/LlmServiceBackend";
+import { getAllEntities, seedDatabase } from "@/server/models/world";
+import { getHistory, addMessage, clearHistory } from "@/server/models/history";
+import { getAllPlots } from "@/server/models/plot";
 
 const apiRouter = express.Router();
 
@@ -22,7 +22,7 @@ apiRouter.get("/history", (req, res) => {
 });
 
 apiRouter.post("/reset", (req, res) => {
-  import("./db.js").then(({ default: db }) => {
+  import("@/server/database").then(({ default: db }) => {
     db.prepare("DELETE FROM history_messages").run();
     db.prepare("DELETE FROM plots").run();
     db.prepare("DELETE FROM entities").run();

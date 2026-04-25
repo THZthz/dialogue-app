@@ -47,17 +47,19 @@ The project follows a full-stack structure with React on the frontend and an Exp
 │   │   └── sampleDialogue.ts    # Seed dialogue data
 │   ├── server/              # Backend Logic
 │   │   ├── api.ts               # Express route handlers
-│   │   ├── db.ts                # Database connection/initialization
+│   │   ├── datebase.ts          # Database connection/initialization
 │   │   ├── LlmServiceBackend.ts # Server-side AI orchestration
-│   │   ├── historyModel.ts      # Conversation history DB interactions
-│   │   ├── plotModel.ts         # Story progression DB interactions
-│   │   └── worldModel.ts        # Entities and world state DB interactions
+│   │   └── models/              # DB interactions
+│   │       ├── history.ts       # Conversation history queries
+│   │       ├── plot.ts          # Story progression queries
+│   │       └── world.ts         # Entities and world state queries
 │   ├── services/            # Frontend Core Logic
 │   │   ├── LlmService.ts        # AI communication client
 │   │   ├── WorldManager.ts      # Global world state tracker
 │   │   └── tools/               # LLM Function Calling implementations
 │   │       ├── addDialogueStep.ts # Adds new dialogue nodes
-│   │       ├── plotTools.ts       # Progression triggers
+│   │       ├── addPlot.ts         # Add new plot triggers
+│   │       ├── updatePlotStatus.ts# Update plot state
 │   │       └── updateWorldState.ts # State synchronization
 │   └── types/               # Shared Type Definitions
 │       ├── dialogue.ts          # Dialogue system interfaces
