@@ -13,7 +13,61 @@ This document provides an overview of the architecture, core systems, and data s
 
 ---
 
-## 2. Core Architecture
+## 2. Project Structure
+
+The project follows a full-stack structure with React on the frontend and an Express server on the backend.
+
+```text
+.
+├── DEVELOPER.md             # Technical documentation and maintenance logs
+├── README.md                # Project overview and quick start
+├── game.db                  # SQLite database for world state and history
+├── game.db-shm / game.db-wal # SQLite temporary files
+├── index.html               # Entry HTML for Vite
+├── metadata.json            # AI Studio app metadata
+├── package.json             # Project dependencies and scripts
+├── server.ts                # Backend entry point (Express + Vite middleware)
+├── tsconfig.json            # TypeScript configuration
+├── vite.config.ts           # Vite configuration
+├── src/
+│   ├── main.tsx             # Frontend entry point
+│   ├── App.tsx              # Main application component/orchestrator
+│   ├── index.css            # Global styles and Tailwind imports
+│   ├── components/          # React UI Components
+│   │   ├── CharacterPanel.tsx   # Sidebar for character stats and world registered entities
+│   │   ├── DialogueMessage.tsx  # Individual message styling
+│   │   ├── DialogueOptions.tsx  # List of player choices
+│   │   ├── DiceRoller.tsx       # Skill check simulation
+│   │   ├── ObjectLink.tsx       # Interactive links in text
+│   │   ├── ObjectTooltip.tsx    # Content for hovered links
+│   │   └── TypingIndicator.tsx  # NPC character typing status
+│   ├── context/             # Global State
+│   │   └── CharacterContext.tsx # Player attributes and bonuses
+│   ├── data/                # Static assets/initial states
+│   │   └── sampleDialogue.ts    # Seed dialogue data
+│   ├── server/              # Backend Logic
+│   │   ├── api.ts               # Express route handlers
+│   │   ├── db.ts                # Database connection/initialization
+│   │   ├── LlmServiceBackend.ts # Server-side AI orchestration
+│   │   ├── historyModel.ts      # Conversation history DB interactions
+│   │   ├── plotModel.ts         # Story progression DB interactions
+│   │   └── worldModel.ts        # Entities and world state DB interactions
+│   ├── services/            # Frontend Core Logic
+│   │   ├── LlmService.ts        # AI communication client
+│   │   ├── WorldManager.ts      # Global world state tracker
+│   │   └── tools/               # LLM Function Calling implementations
+│   │       ├── addDialogueStep.ts # Adds new dialogue nodes
+│   │       ├── plotTools.ts       # Progression triggers
+│   │       └── updateWorldState.ts # State synchronization
+│   └── types/               # Shared Type Definitions
+│       ├── dialogue.ts          # Dialogue system interfaces
+│       ├── entities.ts          # Character and object interfaces
+│       └── worldObject.ts       # Specific object properties
+```
+
+---
+
+## 3. Core Architecture
 
 ### State Management
 - **Local State (`App.tsx`):** Maintains the `history` of the conversation, `currentStepId`, and UI states like `isTyping` or `currentCheck`.
@@ -30,7 +84,7 @@ This document provides an overview of the architecture, core systems, and data s
 
 ---
 
-## 3. Data Structures
+## 4. Data Structures
 
 Defined in `src/types/dialogue.ts`.
 
@@ -59,13 +113,14 @@ Dialogue messages support interactive object links using a custom markdown-like 
 `[Object Name](#object_id)`
 
 - **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
-- **LlmService (`src/services/LlmService.ts`)**: Handles dynamic AI dialogue using **Vercel AI SDK** with the **DeepSeek** model. This system uses `generateObject` with a **Zod schema** to ensure structured outputs for dialogue, world updates, and suggested options.
+- **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prefers **Gemini 1.5/2.0** models (via Google Generative AI provider) and falls back to **DeepSeek-V3**. The system utilizes tool calling (function calling) to perform world updates, plot transitions, and generate narrative dialogue steps.
+- **LlmService (`src/services/LlmService.ts`)**: A frontend client wrapper that proxies requests to the backend `/api/chat` route.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 
 ---
 
-## 4. Key Systems
+## 5. Key Systems
 
 ### Sequential Message Flow
 Implemented in `App.tsx` using `displayMessages`. It uses an `async` loop with `setTimeout` to push messages into the `history` array one by one. The delay is dynamic based on text length.
@@ -84,7 +139,7 @@ This allows for flexible logic like "Critical Success" (rolling double 6s) or "P
 
 ---
 
-## 5. How to Extend
+## 6. How to Extend
 
 ### Adding New Dialogue
 Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialogue` object.
@@ -93,9 +148,9 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 3. Add options that link back to existing steps or new ones.
 
 ### Adding New Skills
-1. Update the `CharacterStats` interface in `src/context/CharacterContext.tsx`.
-2. Update the `defaultCharacter` object with a base value.
-3. Update the `CharacterPanel.tsx` visual if needed.
+1. Update the `CharacterStats` interface in `src/types/entities.ts` (if applicable) and the `defaultCharacter` state in `src/context/CharacterContext.tsx`.
+2. The current active skills are: `Logic`, `Rhetoric`, `Empathy`, `Perception`, `Volition`, `Endurance`, `Inland Empire`, `Suggestion`, `Half Light`, and `Physical Instrument`.
+3. Update the `CharacterPanel.tsx` visual to display the new skill.
 
 ### Adding New World Entities
 1. Open `src/services/WorldManager.ts`.
@@ -105,7 +160,7 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 
 ---
 
-## 6. Component Breakdown
+## 7. Component Breakdown
 
 - `App.tsx`: The orchestrator.
 - `CharacterPanel.tsx`: Slidable sidebar for attributes.
@@ -118,16 +173,6 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 
 ---
 
-## 7. Maintenance Log
+## 8. Change History
 
-### 2026-04-24
-- **Scrollbar Fix**: Resolved issue where the internal scroll container (`main`) was not correctly established due to a `min-h-screen` layout constraint on both the parent and the child. Standardized the hierarchy to use `h-screen overflow-hidden` on the layout root and `h-full overflow-y-auto` on the scrollable main container. Fixed custom scrollbar visibility on smaller viewports.
-
-### 2026-04-23
-- **LLM Upgrade**: Migrated from Google Generative AI SDK to **Vercel AI SDK** (`ai`). `genai` will not work in the project.
-- **Model Switch**: Now using **DeepSeek-V3** (`deepseek-chat`) for narratively rich and structured RPG responses.
-- **Type Safety**: Integrated **Zod** in `LlmService.ts` for automated schema validation of AI responses.
-- **UI Polish**: Applied global scrollbar hiding in `index.css` to enhance cinematic immersion while preserving scroll functionality.
-- **Instruction Refinement**: Hardened the system prompt and Zod schema to prevent "response did not match schema" errors (using `.nullish()` and objective-oriented prompting).
-
----
+All modifications to the codebase are tracked in [CHANGELOG.md](./CHANGELOG.md).

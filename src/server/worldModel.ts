@@ -77,12 +77,13 @@ export function seedDatabase() {
         entity.type === 'CHARACTER' ? JSON.stringify(entity.stats || {}) : null,
         entity.type === 'CHARACTER' ? JSON.stringify(entity.opinions || {}) : null
       );
+      console.log(`Inserted ${entity.displayName}.`);
     };
 
     Object.values(initialObjects).forEach(insertEntity);
     Object.values(initialLocations).forEach(insertEntity);
     Object.values(initialCharacters).forEach(insertEntity);
-    
+
     // Seed an initial plot
     const insertPlot = db.prepare("INSERT INTO plots (id, title, description, triggerCondition, status) VALUES (?, ?, ?, ?, ?)");
     insertPlot.run(
@@ -135,7 +136,7 @@ export function updateEntity(entity: Partial<WorldEntity> & { id: string }) {
   const newAttrs = entity.attributes ? { ...currentAttrs, ...entity.attributes } : currentAttrs;
   let newStats = currentStats;
   let newOpinions = currentOpinions;
-  
+
   if (existing.type === 'CHARACTER' && (entity as any).stats) {
     newStats = { ...currentStats, ...(entity as any).stats };
   }
@@ -161,4 +162,14 @@ export function updateEntity(entity: Partial<WorldEntity> & { id: string }) {
     existing.type === 'CHARACTER' ? JSON.stringify(newOpinions) : null,
     entity.id
   );
+  console.log(`Updated ${entity.displayName}.`);
 }
+
+
+
+
+
+
+
+
+
