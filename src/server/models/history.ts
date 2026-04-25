@@ -32,3 +32,12 @@ export function addMessage(msg: Message) {
 export function clearHistory() {
   db.prepare("DELETE FROM history_messages").run();
 }
+
+export function setHistory(messages: Message[]) {
+  db.transaction(() => {
+    clearHistory();
+    for (const msg of messages) {
+      addMessage(msg);
+    }
+  })();
+}

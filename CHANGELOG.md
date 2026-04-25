@@ -3,6 +3,10 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Feature**: Expanded Debug Panel with State Editors.
+  - Added "History" tab to view and modify dialogue message buffers.
+  - Added "World" tab to view and modify world entities (characters, locations, objects) via a manifest list and JSON editor.
+  - Implemented backend synchronization for history and world entity updates.
 - **Maintenance**: Fixed model name typo (`gemini-3.1-flash-lite-preview`).
 - **Feature**: Enhanced LLM request logging.
   - Expanded `addLlmLog` payload to include full tool definitions (schemas), user input, and complete conversation history.

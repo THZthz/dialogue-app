@@ -1,7 +1,7 @@
 import express from "express";
 import { generateAIResponse } from "@/server/LlmServiceBackend";
-import { getAllEntities, seedDatabase } from "@/server/models/world";
-import { getHistory, addMessage, clearHistory } from "@/server/models/history";
+import { getAllEntities, seedDatabase, upsertEntity } from "@/server/models/world";
+import { getHistory, addMessage, clearHistory, setHistory } from "@/server/models/history";
 import { getAllPlots } from "@/server/models/plot";
 import { getLlmLogs, clearLlmLogs } from "@/server/models/debug";
 
@@ -14,12 +14,30 @@ apiRouter.get("/world", (req, res) => {
   res.json(getAllEntities());
 });
 
+apiRouter.post("/world/entity", (req, res) => {
+  try {
+    upsertEntity(req.body);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
 apiRouter.get("/plots", (req, res) => {
   res.json(getAllPlots());
 });
 
 apiRouter.get("/history", (req, res) => {
   res.json(getHistory());
+});
+
+apiRouter.post("/history", (req, res) => {
+  try {
+    setHistory(req.body);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
 });
 
 apiRouter.get("/debug/logs", (req, res) => {

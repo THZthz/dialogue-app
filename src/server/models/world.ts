@@ -165,6 +165,30 @@ export function updateEntity(entity: Partial<WorldEntity> & { id: string }) {
   console.log(`Updated ${entity.displayName}.`);
 }
 
+export function upsertEntity(entity: WorldEntity) {
+  db.prepare(`
+    INSERT INTO entities (id, type, displayName, shortDescription, longDescription, attributes, stats, opinions)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    ON CONFLICT(id) DO UPDATE SET
+      type = excluded.type,
+      displayName = excluded.displayName,
+      shortDescription = excluded.shortDescription,
+      longDescription = excluded.longDescription,
+      attributes = excluded.attributes,
+      stats = excluded.stats,
+      opinions = excluded.opinions
+  `).run(
+    entity.id,
+    entity.type,
+    entity.displayName,
+    entity.shortDescription,
+    entity.longDescription,
+    JSON.stringify(entity.attributes || {}),
+    entity.type === 'CHARACTER' ? JSON.stringify((entity as any).stats || {}) : null,
+    entity.type === 'CHARACTER' ? JSON.stringify((entity as any).opinions || {}) : null
+  );
+}
+
 
 
 

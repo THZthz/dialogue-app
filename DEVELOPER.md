@@ -122,7 +122,10 @@ Dialogue messages support interactive object links using a custom markdown-like 
 - **Debug System**:
   - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
   - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
-  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A frontend component (toggled via a bug icon at the bottom right) that displays a chronological history of LLM requests (system instructions, prompts, full histories, and detailed tool schemas) and responses (text, tool calls, raw JSON).
+  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management.
+    - **Logs**: Displays chronological LLM interactions with collapsible JSON explorers for request/response payloads.
+    - **History**: Allows direct JSON editing and synchronization of the dialogue message buffer.
+    - **World**: Provides a manifest of all entities with an editor to update character stats, location descriptions, and object attributes.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
 - **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
 
