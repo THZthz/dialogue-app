@@ -35,12 +35,12 @@ The project follows a full-stack structure with React on the frontend and an Exp
 │   ├── index.css            # Global styles and Tailwind imports
 │   ├── components/          # React UI Components
 │   │   ├── CharacterPanel.tsx   # Sidebar for character stats and world registered entities
-│   │   ├── DialogueMessage.tsx  # Individual message styling
+│   │   ├── DialogueMessage.tsx  # Individual message styling. Handles message types and "Tooltips" for past roll results.
 │   │   ├── DialogueOptions.tsx  # List of player choices
 │   │   ├── DiceRoller.tsx       # Skill check simulation
-│   │   ├── ObjectLink.tsx       # Interactive links in text
-│   │   ├── ObjectTooltip.tsx    # Content for hovered links
-│   │   └── TypingIndicator.tsx  # NPC character typing status
+│   │   ├── ObjectLink.tsx       # Interactive links in text. Parses object references and manages the hover-persistent state.
+│   │   ├── ObjectTooltip.tsx    # Content for hovered links. Renders the detailed object lore and allows interaction via a "hover-bridge" padding technique.
+│   │   └── TypingIndicator.tsx  # NPC character typing status, "..." animated feedback
 │   ├── context/             # Global State
 │   │   └── CharacterContext.tsx # Player attributes and bonuses
 │   ├── data/                # Static assets/initial states
@@ -160,19 +160,6 @@ Navigate to `src/data/sampleDialogue.ts` and add a new entry to the `sampleDialo
 
 ---
 
-## 7. Component Breakdown
-
-- `App.tsx`: The orchestrator.
-- `CharacterPanel.tsx`: Slidable sidebar for attributes.
-- `DiceRoller.tsx`: Logic and animation for the 2D6 rolling system.
-- `DialogueMessage.tsx`: Handles message types and "Tooltips" for past roll results.
-- `DialogueOptions.tsx`: Maps choices to interaction events.
-- `TypingIndicator.tsx`: The "..." animated feedback.
-- `ObjectLink.tsx`: Parses object references and manages the hover-persistent state.
-- `ObjectTooltip.tsx`: Renders the detailed object lore and allows interaction via a "hover-bridge" padding technique.
-
----
-
-## 8. Change History
+## 7. Change History
 
 All modifications to the codebase are tracked in [CHANGELOG.md](./CHANGELOG.md).
