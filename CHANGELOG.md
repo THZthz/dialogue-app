@@ -9,6 +9,7 @@ All notable changes to this project will be documented in this file.
   - Implemented **JSON Schema** hinting and validation for `Message` and `WorldEntity` types using `codemirror-json-schema`.
   - Upgraded "Logs" viewer to use read-only CodeMirror for a unified, high-fidelity experience.
   - **Design**: Customized CodeMirror theme to align with the application's dark aesthetic, including themed tooltips, gutters, and selection highlights.
+  - **Refined Styling**: Deepened the editor background to `#020617` and synchronized scrollbar visuals for a seamless integrated feel.
 - **Feature**: Expanded Debug Panel with State Editors.
   - Added "History" tab to view and modify dialogue message buffers.
   - Added "World" tab to view and modify world entities (characters, locations, objects) via a manifest list and JSON editor.

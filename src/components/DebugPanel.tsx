@@ -108,13 +108,16 @@ const ENTITY_SCHEMA = {
 const debugTheme = EditorView.theme({
   "&": {
     fontSize: "11px",
-    backgroundColor: "transparent !important",
+    backgroundColor: "#020617 !important",
+  },
+  "&.cm-focused": {
+    outline: "none",
   },
   ".cm-content": {
     fontFamily: "var(--font-mono)",
   },
   ".cm-gutters": {
-    backgroundColor: "transparent !important",
+    backgroundColor: "#020617 !important",
     borderRight: "1px solid rgba(255, 255, 255, 0.05)",
     color: "#4b5563 !important",
     minWidth: "32px",
@@ -125,6 +128,26 @@ const debugTheme = EditorView.theme({
   },
   ".cm-activeLine": {
     backgroundColor: "rgba(255, 255, 255, 0.02) !important",
+  },
+  ".cm-scroller::-webkit-scrollbar": {
+    width: "6px",
+    height: "6px",
+  },
+  ".cm-scroller::-webkit-scrollbar-track": {
+    background: "rgba(0, 0, 0, 0.2)",
+    borderRadius: "10px",
+  },
+  ".cm-scroller::-webkit-scrollbar-thumb": {
+    background: "rgba(255, 255, 255, 0.1)",
+    borderRadius: "10px",
+    border: "1px solid rgba(0, 0, 0, 0.2)",
+  },
+  ".cm-scroller::-webkit-scrollbar-thumb:hover": {
+    background: "rgba(255, 255, 255, 0.2)",
+  },
+  ".cm-scroller": {
+    scrollbarWidth: "thin",
+    scrollbarColor: "rgba(255, 255, 255, 0.1) rgba(0, 0, 0, 0.2)",
   },
   ".cm-selectionBackground": {
     backgroundColor: "rgba(59, 130, 246, 0.2) !important",
@@ -184,7 +207,7 @@ const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
   if (!data) return <div className="p-4 text-gray-600 italic text-xs">Empty Transmission</div>;
   
   return (
-    <div className="h-full bg-black/20">
+    <div className="h-full bg-[#020617]">
       <CodeMirror
         value={formatted}
         height="100%"
