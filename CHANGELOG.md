@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-25
+- **Design Enhancement**: Re-styled `JsonExplorer` to a high-contrast **One Dark Darker** theme.
+  - Set background to `#181a1f` and optimized tree colors (Red/Green/Orange/Purple) for maximum readability.
 - **Feature**: Upgraded Debug Panel JSON Editors.
   - Replaced basic textareas with **CodeMirror** in History and World editors.
   - Added syntax highlighting, code folding (collapsing), and indentation support.

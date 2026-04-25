@@ -51,7 +51,7 @@ const ResizableContainer: React.FC<{
 
   return (
     <div 
-      className={`relative rounded-sm border border-white/10 bg-[#0a0a0a] flex flex-col group/resizable overflow-hidden ${className}`}
+      className={`relative rounded-sm border border-white/5 bg-[#0b0c0e] flex flex-col group/resizable overflow-hidden ${className}`}
       style={{ height: `${height}px` }}
     >
       <div className="flex-1 min-h-0 relative">
@@ -174,39 +174,128 @@ const debugTheme = EditorView.theme({
   },
 }, { dark: true });
 
+const JsonNode: React.FC<{
+  label?: string;
+  value: any;
+  depth: number;
+  isLast?: boolean;
+}> = ({ label, value, depth, isLast = true }) => {
+  const [isExpanded, setIsExpanded] = useState(depth < 1);
+  const hasChildren = value !== null && typeof value === 'object';
+  const isEmpty = hasChildren && (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0);
+
+  const renderValue = () => {
+    if (value === null) return <span className="text-[#5c6370]">null</span>;
+    if (typeof value === 'string') return <span className="text-[#98c379]">"{value}"</span>;
+    if (typeof value === 'number') return <span className="text-[#d19a66]">{value}</span>;
+    if (typeof value === 'boolean') return <span className="text-[#c678dd] font-bold">{value.toString()}</span>;
+    
+    if (Array.isArray(value)) {
+       if (isEmpty) return <span className="text-[#abb2bf]/20">[]</span>;
+       
+       return isExpanded ? (
+          <span>
+           <span className="text-[#abb2bf]/70">[</span>
+           <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
+             {value.map((v, i) => (
+               <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
+             ))}
+           </div>
+           <span className="text-[#abb2bf]/70">]</span>
+         </span>
+       ) : (
+         <button 
+          onClick={() => setIsExpanded(true)}
+          className="text-[#5c6370] hover:text-[#61afef] bg-white/[0.03] px-1 rounded transition-colors text-[10px]"
+         >
+           [{value.length} items]
+         </button>
+       );
+    }
+    
+    // Object
+    if (isEmpty) return <span className="text-[#abb2bf]/20">{"{}"}</span>;
+
+    return isExpanded ? (
+      <span>
+        <span className="text-[#abb2bf]/70">{"{"}</span>
+        <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
+          {Object.entries(value).map(([k, v], i, arr) => (
+            <JsonNode key={k} label={k} value={v} depth={depth + 1} isLast={i === arr.length - 1} />
+          ))}
+        </div>
+        <span className="text-[#abb2bf]/70">{"}"}</span>
+      </span>
+    ) : (
+      <button 
+        onClick={() => setIsExpanded(true)}
+        className="text-[#5c6370] hover:text-[#61afef] bg-white/[0.03] px-1 rounded transition-colors text-[10px]"
+      >
+        {"{ " + Object.keys(value).slice(0, 2).join(', ') + (Object.keys(value).length > 2 ? '...' : '') + " }"}
+      </button>
+    );
+  };
+
+  return (
+    <div className="font-mono text-[11px] leading-relaxed group/node">
+      <div className="flex items-start">
+        <div className="w-4 h-4 flex items-center justify-center flex-shrink-0 mt-0.5">
+          {hasChildren && !isEmpty && (
+            <button 
+              onClick={() => setIsExpanded(!isExpanded)}
+              className={`text-gray-500 hover:text-blue-400 transition-transform duration-200 ${isExpanded ? 'rotate-0' : '-rotate-90'}`}
+            >
+              <ChevronDown size={12} />
+            </button>
+          )}
+        </div>
+        
+        <div className="flex-1 min-w-0">
+          {label && (
+            <span className="text-[#e06c75] mr-2 group-hover/node:text-[#e06c75] transition-colors">
+              <span className="text-[#abb2bf]">"</span>{label}<span className="text-[#abb2bf]">"</span>
+              <span className="text-[#abb2bf] ml-1">:</span>
+            </span>
+          )}
+          {renderValue()}
+          {!isLast && <span className="text-[#abb2bf]">,</span>}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
-  const [formatted, setFormatted] = useState<string>('');
-  const [isJson, setIsJson] = useState(true);
+  const [parsed, setParsed] = useState<any>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!data) return;
     try {
-      setFormatted(JSON.stringify(JSON.parse(data), null, 2));
-      setIsJson(true);
+      setParsed(JSON.parse(data));
+      setError(null);
     } catch (e) {
-      setFormatted(data);
-      setIsJson(false);
+      setError(data);
     }
   }, [data]);
 
   if (!data) return <div className="p-4 text-white/30 italic text-[10px] uppercase tracking-widest">Empty_Transmission</div>;
   
+  if (error) {
+    return (
+      <div className="p-3 h-full overflow-auto debug-scrollbar bg-transparent">
+        <pre className="text-[#e06c75] text-[11px] font-mono whitespace-pre-wrap leading-relaxed">
+          {error}
+        </pre>
+      </div>
+    );
+  }
+
+  if (!parsed) return null;
+
   return (
-    <div className="h-full bg-[#0d0d0d]">
-      <CodeMirror
-        value={formatted}
-        height="100%"
-        theme={oneDark}
-        extensions={[json(), debugTheme]}
-        readOnly={true}
-        editable={false}
-        basicSetup={{
-          lineNumbers: true,
-          foldGutter: true,
-          highlightActiveLine: false,
-        }}
-        className={`h-full text-[11px] ${!isJson ? 'opacity-50 grayscale' : ''}`}
-      />
+    <div className="p-3 h-full overflow-auto debug-scrollbar bg-transparent">
+      <JsonNode value={parsed} depth={0} />
     </div>
   );
 };
@@ -625,8 +714,8 @@ export const DebugPanel: React.FC = () => {
                           key={log.id}
                           className={`border rounded-sm overflow-hidden transition-all duration-300 ${
                             expandedId === log.id 
-                              ? 'border-white/30 bg-white/5' 
-                              : 'border-white/10 hover:border-white/20 bg-white/2'
+                              ? 'border-white/[0.15] bg-white/[0.03]' 
+                              : 'border-white/5 hover:border-white/[0.08] bg-white/[0.015]'
                           }`}
                         >
                           <button
@@ -662,11 +751,11 @@ export const DebugPanel: React.FC = () => {
                                 transition={{ duration: 0.3 }}
                                 className="overflow-hidden border-t border-white/10"
                               >
-                                <div className="divide-y divide-white/5">
-                                  <div className="p-5 bg-black/20">
+                                <div className="divide-y divide-white/[0.03]">
+                                  <div className="p-5 bg-[#0b0c0e]">
                                     <div className="flex justify-between items-center mb-4">
-                                      <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center gap-3">
-                                        <div className="w-[1px] h-3 bg-[#9081e3]" />
+                                      <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
+                                        <div className="w-[1px] h-3 bg-[#e06c75]" />
                                         Outgoing_Request
                                       </h3>
                                       <CopyButton content={formatJson(log.request)} />
@@ -675,10 +764,10 @@ export const DebugPanel: React.FC = () => {
                                       <JsonExplorer data={log.request} />
                                     </ResizableContainer>
                                   </div>
-                                  <div className="p-5 bg-black/40">
+                                  <div className="p-5 bg-[#0a0a0c]">
                                     <div className="flex justify-between items-center mb-4">
-                                      <h3 className="text-[10px] font-bold text-white/40 uppercase tracking-[0.2em] flex items-center gap-3">
-                                        <div className="w-[1px] h-3 bg-[#a3c2a3]" />
+                                      <h3 className="text-[10px] font-bold text-white/20 uppercase tracking-[0.2em] flex items-center gap-3">
+                                        <div className="w-[1px] h-3 bg-[#98c379]" />
                                         Incoming_Response
                                       </h3>
                                       <CopyButton content={formatJson(log.response)} />
