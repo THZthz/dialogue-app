@@ -257,16 +257,6 @@ export default function App() {
     }
   };
 
-  const obj = {
-    a: 1,
-    b: true,
-    c: "3",
-    d: {
-      e: [3, "33"]
-    }
-  };
-  console.log("A simple object:", obj);
-
   return (
     <div className="h-screen w-screen bg-[#0a0a0a] text-gray-100 flex justify-center selection:bg-[#ff6b35] selection:text-white overflow-hidden relative">
       <CharacterPanel />
