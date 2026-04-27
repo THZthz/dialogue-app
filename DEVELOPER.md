@@ -125,7 +125,7 @@ Dialogue messages support interactive object links using a custom markdown-like 
   - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
   - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
   - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management. It features a cinematic backdrop that allows closing the panel by clicking outside. The layout is modularized into dedicated sub-components within the file:
-    - **Logs (`LlmTraceViewer`)**: Displays chronological LLM interactions with a read-only CodeMirror viewer for code blocks and a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads.
+    - **Logs (`LlmTraceViewer`)**: Displays chronological LLM interactions with a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads. Includes a text wrapping toggle for managing large string content.
     - **Console (`ConsoleViewer`)**: Real-time browser console log viewer with timestamp and log level filtering visualization. Captures `log`, `info`, `warn`, and `error`. Supports interactive JSON inspection for objects passed as arguments.
     - **History (`HistoryEditor`)**: Advanced JSON editor (via CodeMirror) with schema validation (via `codemirror-json-schema`) for synchronizing the dialogue message buffer.
     - **World (`WorldEditor`)**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation. Allows direct modification of characters, locations, and interactive objects.

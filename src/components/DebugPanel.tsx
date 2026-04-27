@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug,
-  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle, Monitor
+  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle, Monitor, WrapText
 } from 'lucide-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
@@ -180,14 +180,21 @@ const JsonNode: React.FC<{
   value: any;
   depth: number;
   isLast?: boolean;
-}> = ({ label, value, depth, isLast = true }) => {
+  isWrapping?: boolean;
+}> = ({ label, value, depth, isLast = true, isWrapping = true }) => {
   const [isExpanded, setIsExpanded] = useState(depth < 1);
   const hasChildren = value !== null && typeof value === 'object';
   const isEmpty = hasChildren && (Array.isArray(value) ? value.length === 0 : Object.keys(value).length === 0);
 
   const renderValue = () => {
     if (value === null) return <span className="text-[#5c6370]">null</span>;
-    if (typeof value === 'string') return <span className="text-[#98c379] whitespace-pre-wrap break-words">"{value}"</span>;
+    if (typeof value === 'string') {
+      return (
+        <span className={`text-[#98c379] ${isWrapping ? 'whitespace-pre-wrap break-words' : 'whitespace-pre'}`}>
+          "{value}"
+        </span>
+      );
+    }
     if (typeof value === 'number') return <span className="text-[#d19a66]">{value}</span>;
     if (typeof value === 'boolean') return <span className="text-[#c678dd] font-bold">{value.toString()}</span>;
 
@@ -199,7 +206,7 @@ const JsonNode: React.FC<{
           <span className="text-[#abb2bf]/70">[</span>
           <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
             {value.map((v, i) => (
-              <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} />
+              <JsonNode key={i} value={v} depth={depth + 1} isLast={i === value.length - 1} isWrapping={isWrapping} />
             ))}
           </div>
           <span className="text-[#abb2bf]/70">]</span>
@@ -222,7 +229,7 @@ const JsonNode: React.FC<{
         <span className="text-[#abb2bf]/70">{"{"}</span>
         <div className="pl-4 border-l border-white/[0.03] ml-1.5 my-0.5">
           {Object.entries(value).map(([k, v], i, arr) => (
-            <JsonNode key={k} label={k} value={v} depth={depth + 1} isLast={i === arr.length - 1} />
+            <JsonNode key={k} label={k} value={v} depth={depth + 1} isLast={i === arr.length - 1} isWrapping={isWrapping} />
           ))}
         </div>
         <span className="text-[#abb2bf]/70">{"}"}</span>
@@ -266,7 +273,7 @@ const JsonNode: React.FC<{
   );
 };
 
-const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
+const JsonExplorer: React.FC<{ data: string | null; isWrapping?: boolean }> = ({ data, isWrapping = true }) => {
   const [parsed, setParsed] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
 
@@ -285,7 +292,7 @@ const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
   if (error) {
     return (
       <div className="p-3 h-full overflow-auto debug-scrollbar bg-transparent">
-        <pre className="text-[#e06c75] text-[11px] font-mono whitespace-pre-wrap leading-relaxed">
+        <pre className={`text-[#e06c75] text-[11px] font-mono leading-relaxed ${isWrapping ? 'whitespace-pre-wrap' : 'whitespace-pre'}`}>
           {error}
         </pre>
       </div>
@@ -296,7 +303,9 @@ const JsonExplorer: React.FC<{ data: string | null }> = ({ data }) => {
 
   return (
     <div className="p-3 h-full overflow-auto debug-scrollbar bg-transparent">
-      <JsonNode value={parsed} depth={0} />
+      <div className={!isWrapping ? "w-fit min-w-full" : ""}>
+        <JsonNode value={parsed} depth={0} isWrapping={isWrapping} />
+      </div>
     </div>
   );
 };
@@ -335,6 +344,7 @@ const LlmTraceViewer: React.FC = () => {
   const [logs, setLogs] = useState<LlmLog[]>([]);
   const [expandedId, setExpandedId] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [isWrapping, setIsWrapping] = useState(true);
 
   const fetchLogs = async () => {
     setIsLoading(true);
@@ -381,6 +391,18 @@ const LlmTraceViewer: React.FC = () => {
           <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">LLM_TRACE</h3>
         </div>
         <div className="flex items-center gap-3">
+          <button
+            onClick={() => setIsWrapping(!isWrapping)}
+            className={`flex items-center gap-2 px-3 py-1 rounded-sm border transition-all ${
+              isWrapping
+                ? 'bg-white/10 text-white border-white/20'
+                : 'bg-white/5 text-white/40 border-white/10 hover:bg-white/10 hover:text-white/60'
+            }`}
+            title={isWrapping ? "Disable text wrap" : "Enable text wrap"}
+          >
+            <WrapText size={14} className={isWrapping ? 'text-blue-400' : ''} />
+            <span className="text-[10px] font-bold uppercase tracking-wider">Wrap</span>
+          </button>
           <button
             onClick={fetchLogs}
             disabled={isLoading}
@@ -456,7 +478,7 @@ const LlmTraceViewer: React.FC = () => {
                             <CopyButton content={formatJson(log.request)} />
                           </div>
                           <ResizableContainer>
-                            <JsonExplorer data={log.request} />
+                            <JsonExplorer data={log.request} isWrapping={isWrapping} />
                           </ResizableContainer>
                         </div>
                         <div className="p-5 bg-[#0a0a0c]">
@@ -468,7 +490,7 @@ const LlmTraceViewer: React.FC = () => {
                             <CopyButton content={formatJson(log.response)} />
                           </div>
                           <ResizableContainer>
-                            <JsonExplorer data={log.response} />
+                            <JsonExplorer data={log.response} isWrapping={isWrapping} />
                           </ResizableContainer>
                         </div>
                       </div>
@@ -483,7 +505,8 @@ const LlmTraceViewer: React.FC = () => {
           </div>
         )}
       </div>
-    </div>);
+    </div>
+  );
 };
 
 const HistoryEditor: React.FC = () => {

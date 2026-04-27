@@ -3,6 +3,8 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-27
+- **Debug Panel**: Fixed layout issue in `LlmTraceViewer` where disabling text wrapping caused redundant per-line scrollbars; the entire JSON tree now correctly handles horizontal overflow.
+- **Debug Panel**: Added a text wrapping toggle to the `LlmTraceViewer` allowing users to switch between wrapped text and horizontal scrolling for large JSON payloads.
 - **Debug Panel**: Fixed an issue where newlines (`\n`) were not displayed in the LLM trace by adding `whitespace-pre-wrap` to JSON string values.
 - **Debug Panel**: Enhanced `ConsoleViewer` with interactive JSON inspection for logged objects, utilizing the internal `JsonNode` for a consistent "One Dark" aesthetic.
 - **Fix**: Adjusted console log example in `App.tsx` to use proper argument separation for rich object inspection.
