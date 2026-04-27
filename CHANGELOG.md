@@ -3,14 +3,15 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-27
+- **Debug Panel**: Enhanced `ConsoleViewer` with interactive JSON inspection for logged objects, utilizing the internal `JsonNode` for a consistent "One Dark" aesthetic.
+- **Fix**: Adjusted console log example in `App.tsx` to use proper argument separation for rich object inspection.
+- **Docs**: Synchronized `DEVELOPER.md` with the current codebase state.
+- **Refactor**: Reorganized project structure into clearer `client/` and `server/` directories.
 - **UI/UX**: Simplified project changelog for better readability.
 - **Debug Panel**: Improved interaction with click-to-close backdrop and enhanced focus styling.
 
 ### 2026-04-25
 - **Advanced Debugging**: Major upgrade to the `DebugPanel`.
-  - Added integrated Browser Console and LLM Trace viewers.
-  - Implemented **CodeMirror** editors with JSON Schema validation for History and World state.
-  - Added persistent SQLite tracking for all AI interactions and tool calls.
 - **Design & UI**: Unified toggle button aesthetics and introduced "One Dark" syntax highlighting.
 - **System**: Refined LLM request logging and corrected model configurations.
 

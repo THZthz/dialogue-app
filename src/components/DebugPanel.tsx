@@ -778,13 +778,33 @@ const ConsoleViewer: React.FC = () => {
               }`}>
                 [{log.level}]
               </span>
-              <pre className={`flex-1 whitespace-pre-wrap break-all ${
-                log.level === 'error' ? 'text-red-300/90' :
-                log.level === 'warn' ? 'text-yellow-200/80' :
-                'text-gray-300'
-              }`}>
-                {log.message}
-              </pre>
+              <div className="flex-1 flex flex-wrap items-start gap-x-2">
+                {log.args.map((arg, i) => {
+                  if (typeof arg === 'string') {
+                    return (
+                      <span key={i} className={`whitespace-pre-wrap break-all ${
+                        log.level === 'error' ? 'text-red-300/90' :
+                        log.level === 'warn' ? 'text-yellow-200/80' :
+                        'text-gray-300'
+                      }`}>
+                        {arg}
+                      </span>
+                    );
+                  }
+                  if (arg === null || arg === undefined || typeof arg !== 'object') {
+                    return (
+                      <span key={i} className="text-white/40 tabular-nums">
+                        {String(arg)}
+                      </span>
+                    );
+                  }
+                  return (
+                    <div key={i} className="w-full mt-1 mb-2 p-2 bg-white/[0.02] border border-white/10 rounded-sm overflow-x-auto debug-scrollbar">
+                      <JsonNode value={arg} depth={1} />
+                    </div>
+                  );
+                })}
+              </div>
             </div>
           ))
         )}

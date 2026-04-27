@@ -4,9 +4,9 @@
   "version": "0.0.0",
   "type": "module",
   "scripts": {
-    "dev": "tsx server.ts",
+    "dev": "tsx src/server/main.ts",
     "start": "node dist/server.cjs",
-    "build": "vite build && esbuild server.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/server.cjs --external:express --external:better-sqlite3",
+    "build": "vite build && esbuild src/server/main.ts --bundle --platform=node --target=node20 --format=cjs --outfile=dist/server.cjs --external:express --external:better-sqlite3",
     "preview": "vite preview",
     "clean": "rm -rf dist",
     "lint": "tsc --noEmit"

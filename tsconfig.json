@@ -4,13 +4,14 @@
     "experimentalDecorators": true,
     "useDefineForClassFields": false,
     "module": "ESNext",
+    "moduleResolution": "bundler",
+    "esModuleInterop": true,
     "lib": [
       "ES2022",
       "DOM",
       "DOM.Iterable"
     ],
     "skipLibCheck": true,
-    "moduleResolution": "bundler",
     "isolatedModules": true,
     "moduleDetection": "force",
     "allowJs": true,

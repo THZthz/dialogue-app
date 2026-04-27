@@ -25,13 +25,13 @@ The project follows a full-stack structure with React on the frontend and an Exp
 ├── index.html               # Entry HTML for Vite
 ├── metadata.json            # AI Studio app metadata
 ├── package.json             # Project dependencies and scripts
-├── server.ts                # Backend entry point (Express + Vite middleware)
 ├── tsconfig.json            # TypeScript configuration
 ├── vite.config.ts           # Vite configuration
 ├── src/
-│   ├── main.tsx             # Frontend entry point
-│   ├── App.tsx              # Main application component/orchestrator
-│   ├── index.css            # Global styles and Tailwind imports
+│   ├── client/              # Frontend Code
+│   │   ├── main.tsx         # Frontend entry point
+│   │   ├── App.tsx          # Main application component/orchestrator
+│   │   └── index.css        # Global styles and Tailwind imports
 │   ├── components/          # React UI Components
 │   │   ├── CharacterPanel.tsx   # Sidebar for character stats and world registered entities
 │   │   ├── DebugPanel.tsx       # Overlay for LLM request/response debugging. Displays transmission logs and JSON payloads.
@@ -46,7 +46,8 @@ The project follows a full-stack structure with React on the frontend and an Exp
 │   ├── data/                # Static assets/initial states
 │   │   └── sampleDialogue.ts    # Seed dialogue data
 │   ├── server/              # Backend Logic
-│   │   ├── api.ts               # Express route handlers
+│   │   ├── main.ts          # Backend entry point (Express + Vite middleware)
+│   │   ├── api.ts           # Express route handlers
 │   │   ├── database.ts          # Database connection/initialization
 │   │   ├── LlmServiceBackend.ts # Server-side AI orchestration
 │   │   └── models/              # DB interactions
@@ -73,7 +74,7 @@ The project follows a full-stack structure with React on the frontend and an Exp
 ## 3. Core Architecture
 
 ### State Management
-- **Local State (`App.tsx`):** Maintains the `history` of the conversation, `currentStepId`, and UI states like `isTyping` or `currentCheck`.
+- **Local State (`src/client/App.tsx`):** Maintains the `history` of the conversation, `currentStepId`, and UI states like `isTyping` or `currentCheck`.
 - **Character Context (`CharacterContext.tsx`):** A React Context that stores the player's attributes (Logic, Rhetoric, etc.). This acts as the "Source of Truth" for skill bonuses during checks.
 
 ### Dialogue Loop
@@ -108,36 +109,38 @@ Supports simple jumps or complex skill-gated transitions.
 
 ### `Message`
 A single line of text in the history.
-- **`type`**: `YOU`, `INNER_VOICE`, `CHARACTER`, `SYSTEM`, or `ROLL`. Determines styling.
+- **`type`**: `YOU`, `INNER_VOICE`, `CHARACTER`, `SYSTEM`, `ROLL`, or `NOTIFICATION`. Determines styling and layout.
 - **`skillCheck`**: Visual hint attached to a message indicating it was the result of a check.
+- **`rollResult`**: Deep-trace data of the roll (dice faces, bonuses, success state) used for the interactive hover tooltips in history.
 
 ### Object Reference System
 Dialogue messages support interactive object links using a custom markdown-like syntax:
 `[Object Name](#object_id)`
 
 - **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
-- **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prefers **Gemini** models (e.g., `gemini-3.1-flash-lite-preview`) and falls back to **DeepSeek-V3**. The system utilizes tool calling (function calling) to perform world updates, plot transitions, and generate narrative dialogue steps.
+- **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prioritizes **Google Gemini 1.5 Flash** (via `gemini-3.1-flash-lite-preview`) when a `GEMINI_API_KEY` is present, falling back to **DeepSeek-V3** (`deepseek-chat`). The system utilizes autonomous tool calling to perform world updates, plot transitions, and generate narrative dialogue steps.
 - **LlmService (`src/services/LlmService.ts`)**: A frontend client wrapper that proxies requests to the backend `/api/chat` route.
+- **ConsoleLogger (`src/services/ConsoleLogger.ts`)**: Intercepts standard `console.*` calls to pipe browser logs into the `DebugPanel` for integrated monitoring.
 - **Debug System**:
   - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
   - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
   - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management. It features a cinematic backdrop that allows closing the panel by clicking outside. The layout is modularized into dedicated sub-components within the file:
     - **Logs (`LlmTraceViewer`)**: Displays chronological LLM interactions with a read-only CodeMirror viewer for code blocks and a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads.
-    - **Console (`ConsoleViewer`)**: Real-time browser console log viewer with timestamp and log level filtering visualization. Captures `log`, `info`, `warn`, and `error`.
-    - **History (`HistoryEditor`)**: Advanced JSON editor (via CodeMirror) for synchronizing the dialogue message buffer with schema validation.
-    - **World (`WorldEditor`)**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation.
-- **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.
-- **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections.
+    - **Console (`ConsoleViewer`)**: Real-time browser console log viewer with timestamp and log level filtering visualization. Captures `log`, `info`, `warn`, and `error`. Supports interactive JSON inspection for objects passed as arguments.
+    - **History (`HistoryEditor`)**: Advanced JSON editor (via CodeMirror) with schema validation (via `codemirror-json-schema`) for synchronizing the dialogue message buffer.
+    - **World (`WorldEditor`)**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation. Allows direct modification of characters, locations, and interactive objects.
+- **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links. Features a hover-to-open logic with click-to-persist functionality.
+- **ObjectTooltip (`src/components/ObjectTooltip.tsx`)**: A cinematic pop-up showing object attributes, short descriptions, and expandable lore sections. It uses a "hover-bridge" padding technique to allow users to move their cursor into the tooltip without it closing.
 
 ---
 
 ## 5. Key Systems
 
 ### Sequential Message Flow
-Implemented in `App.tsx` using `displayMessages`. It uses an `async` loop with `setTimeout` to push messages into the `history` array one by one. The delay is dynamic based on text length.
+Implemented in `src/client/App.tsx` using `displayMessages`. It uses an `async` loop with `setTimeout` to push messages into the `history` array one by one. The delay is dynamic based on text length.
 
 ### Skill Check Evaluator
-Located in `App.tsx` (within `handleRollComplete`) and `DiceRoller.tsx`. It uses a safe `new Function()` evaluator to check player-defined expressions:
+Located in `src/client/App.tsx` (within `handleRollComplete`) and `DiceRoller.tsx`. It uses a safe `new Function()` evaluator to check player-defined expressions:
 ```javascript
 const evaluator = new Function('dice', 'total', 'success', 'diceLen', `return ${condition.expression}`);
 ```
@@ -146,7 +149,7 @@ This allows for flexible logic like "Critical Success" (rolling double 6s) or "P
 ### The "Disco" Aesthetic
 - **Fonts:** Serif for narrative text, Sans/Mono for system info.
 - **Colors:** Specific hex codes for inner voices (`#9081e3`) and player actions (`#ff6b35`).
-- **Texture:** A custom SVG noise filter is applied globally in `index.css` via `.bg-texture`.
+- **Texture:** A custom SVG noise filter is applied globally in `src/client/index.css` via `.bg-texture`.
 
 ---
 
