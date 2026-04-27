@@ -3,6 +3,7 @@
 All notable changes to this project will be documented in this file.
 
 ### 2026-04-27
+- **Debug Panel**: Added date to timestamps in LLM trace and Console logs for better troubleshooting.
 - **Debug Panel**: Added text wrap toggle for LLM logs and fixed related horizontal layout issues.
 - **Debug Panel**: Enhanced `ConsoleViewer` and LLM trace with interactive JSON inspection and visual fixes.
 - **Project**: Reorganized codebase into `client/` and `server/` and updated documentation.

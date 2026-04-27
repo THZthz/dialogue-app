@@ -448,8 +448,16 @@ const LlmTraceViewer: React.FC = () => {
                       }`}>
                       {log.status}
                     </span>
-                    <span className="text-white/30 font-mono text-[10px] tabular-nums tracking-widest">
-                      {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    <span className="text-white/30 font-mono text-[10px] tabular-nums tracking-widest whitespace-nowrap">
+                      {new Date(log.timestamp).toLocaleString([], { 
+                        year: '2-digit',
+                        month: '2-digit', 
+                        day: '2-digit', 
+                        hour: '2-digit', 
+                        minute: '2-digit', 
+                        second: '2-digit',
+                        hour12: false 
+                      }).replace(',', '')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2 font-mono text-[10px] opacity-40 group-hover:opacity-100 transition-opacity">
@@ -790,8 +798,15 @@ const ConsoleViewer: React.FC = () => {
         ) : (
           [...logs].reverse().map((log) => (
             <div key={log.id} className="flex gap-3 py-1 px-2 border-b border-white/[0.03] hover:bg-white/[0.02] group">
-              <span className="text-white/20 select-none w-16 flex-shrink-0 text-[10px]">
-                {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              <span className="text-white/20 select-none w-24 flex-shrink-0 text-[10px] whitespace-nowrap">
+                {new Date(log.timestamp).toLocaleString([], { 
+                  month: '2-digit', 
+                  day: '2-digit', 
+                  hour: '2-digit', 
+                  minute: '2-digit', 
+                  second: '2-digit',
+                  hour12: false 
+                }).replace(',', '')}
               </span>
               <span className={`uppercase font-bold text-[9px] w-12 flex-shrink-0 mt-0.5 ${
                 log.level === 'error' ? 'text-red-400' :
