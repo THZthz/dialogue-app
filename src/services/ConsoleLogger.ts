@@ -51,6 +51,20 @@ class ConsoleLogger {
         if (this.logs.length > 1000) {
           this.logs.shift();
         }
+
+        // Persist to server
+        fetch('/api/debug/console', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            level: log.level,
+            message: log.message,
+            args: log.args
+          })
+        }).catch(err => {
+          // Fallback to original console to avoid infinite loop if this fails
+          this.originalConsole.error?.('Failed to persist console log:', err);
+        });
         
         this.listeners.forEach(listener => listener(log));
       };
@@ -61,13 +75,19 @@ class ConsoleLogger {
     return [...this.logs];
   }
 
-  clearLogs() {
+  setLogs(logs: ConsoleLog[]) {
+    this.logs = logs;
+    this.listeners.forEach(listener => listener({} as ConsoleLog)); // Trigger update
+  }
+
+  async clearLogs() {
     this.logs = [];
-    // Notify listeners that logs are cleared
-    // We can just send a special log or have a separate listener type, 
-    // but simple re-fetch/subscription usually handles it.
-    // For simplicity, let's just trigger listeners with nothing or a special flag.
-    // Actually, subscribers usually use a state update.
+    try {
+      await fetch('/api/debug/console/clear', { method: 'POST' });
+    } catch (err) {
+      this.originalConsole.error?.('Failed to clear persisted console logs:', err);
+    }
+    this.listeners.forEach(listener => listener({} as ConsoleLog));
   }
 
   subscribe(listener: LogListener) {

@@ -10,6 +10,14 @@ export interface LlmLog {
   status: string;
 }
 
+export interface ConsoleLog {
+  id: string;
+  level: string;
+  message: string;
+  args: string;
+  timestamp: string;
+}
+
 export function addLlmLog(request: any): string {
   const id = uuidv4();
   db.prepare(`
@@ -37,4 +45,25 @@ export function getLlmLogs(limit: number = 50): LlmLog[] {
 
 export function clearLlmLogs() {
   db.prepare("DELETE FROM llm_logs").run();
+}
+
+export function addConsoleLog(level: string, message: string, args: any[]): string {
+  const id = uuidv4();
+  db.prepare(`
+    INSERT INTO console_logs (id, level, message, args)
+    VALUES (?, ?, ?, ?)
+  `).run(id, level, message, JSON.stringify(args));
+  return id;
+}
+
+export function getConsoleLogs(limit: number = 200): ConsoleLog[] {
+  return db.prepare(`
+    SELECT * FROM console_logs
+    ORDER BY timestamp DESC
+    LIMIT ?
+  `).all(limit) as ConsoleLog[];
+}
+
+export function clearConsoleLogs() {
+  db.prepare("DELETE FROM console_logs").run();
 }

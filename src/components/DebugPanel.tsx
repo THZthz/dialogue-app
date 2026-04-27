@@ -762,7 +762,26 @@ const WorldEditor: React.FC = () => {
 const ConsoleViewer: React.FC = () => {
   const [logs, setLogs] = useState<ConsoleLog[]>(consoleLogger.getLogs());
 
+  const fetchPersistedLogs = async () => {
+    try {
+      const response = await fetch('/api/debug/console');
+      if (response.ok) {
+        const persistedLogs = await response.json();
+        // Backend returns args as string, we need to parse it for the UI
+        const formattedLogs = persistedLogs.map((log: any) => ({
+          ...log,
+          timestamp: new Date(log.timestamp).getTime(),
+          args: JSON.parse(log.args)
+        }));
+        consoleLogger.setLogs(formattedLogs);
+      }
+    } catch (error) {
+      console.error("Failed to fetch persisted console logs:", error);
+    }
+  };
+
   useEffect(() => {
+    fetchPersistedLogs();
     const unsubscribe = consoleLogger.subscribe(() => {
       setLogs(consoleLogger.getLogs());
     });

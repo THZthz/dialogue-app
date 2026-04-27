@@ -3,7 +3,7 @@ import { generateAIResponse } from "@/server/LlmServiceBackend";
 import { getAllEntities, seedDatabase, upsertEntity } from "@/server/models/world";
 import { getHistory, addMessage, clearHistory, setHistory } from "@/server/models/history";
 import { getAllPlots } from "@/server/models/plot";
-import { getLlmLogs, clearLlmLogs } from "@/server/models/debug";
+import { getLlmLogs, clearLlmLogs, getConsoleLogs, addConsoleLog, clearConsoleLogs } from "@/server/models/debug";
 
 const apiRouter = express.Router();
 
@@ -46,6 +46,25 @@ apiRouter.get("/debug/logs", (req, res) => {
 
 apiRouter.post("/debug/logs/clear", (req, res) => {
   clearLlmLogs();
+  res.json({ success: true });
+});
+
+apiRouter.get("/debug/console", (req, res) => {
+  res.json(getConsoleLogs());
+});
+
+apiRouter.post("/debug/console", (req, res) => {
+  try {
+    const { level, message, args } = req.body;
+    addConsoleLog(level, message, args);
+    res.json({ success: true });
+  } catch (error: any) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+apiRouter.post("/debug/console/clear", (req, res) => {
+  clearConsoleLogs();
   res.json({ success: true });
 });
 
