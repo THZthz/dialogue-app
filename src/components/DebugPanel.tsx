@@ -187,7 +187,7 @@ const JsonNode: React.FC<{
 
   const renderValue = () => {
     if (value === null) return <span className="text-[#5c6370]">null</span>;
-    if (typeof value === 'string') return <span className="text-[#98c379]">"{value}"</span>;
+    if (typeof value === 'string') return <span className="text-[#98c379] whitespace-pre-wrap break-words">"{value}"</span>;
     if (typeof value === 'number') return <span className="text-[#d19a66]">{value}</span>;
     if (typeof value === 'boolean') return <span className="text-[#c678dd] font-bold">{value.toString()}</span>;
 
