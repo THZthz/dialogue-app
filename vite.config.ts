@@ -5,6 +5,7 @@ import {defineConfig, loadEnv} from 'vite';
 
 export default defineConfig(({mode}) => {
   const env = loadEnv(mode, '.', '');
+  console.info("Loaded env.");
   return {
     plugins: [react(), tailwindcss()],
     resolve: {

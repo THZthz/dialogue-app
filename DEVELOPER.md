@@ -20,7 +20,6 @@ The project follows a full-stack structure with React on the frontend and an Exp
 ```text
 .
 ├── DEVELOPER.md             # Technical documentation and maintenance logs
-├── README.md                # Project overview and quick start
 ├── game.db                  # SQLite database for world state and history
 ├── game.db-shm / game.db-wal # SQLite temporary files
 ├── index.html               # Entry HTML for Vite
@@ -117,13 +116,14 @@ Dialogue messages support interactive object links using a custom markdown-like 
 `[Object Name](#object_id)`
 
 - **WorldManager (`src/services/WorldManager.ts`)**: Central storage for all world entities (Objects, Locations, Characters).
-- **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prefers **Gemini 1.5/2.0** models (via Google Generative AI provider) and falls back to **DeepSeek-V3**. The system utilizes tool calling (function calling) to perform world updates, plot transitions, and generate narrative dialogue steps.
+- **LlmServiceBackend (`src/server/LlmServiceBackend.ts`)**: Handles dynamic AI dialogue using the **Vercel AI SDK**. It prefers **Gemini** models (e.g., `gemini-3.1-flash-lite-preview`) and falls back to **DeepSeek-V3**. The system utilizes tool calling (function calling) to perform world updates, plot transitions, and generate narrative dialogue steps.
 - **LlmService (`src/services/LlmService.ts`)**: A frontend client wrapper that proxies requests to the backend `/api/chat` route.
 - **Debug System**:
   - **Database Logging**: LLM interactions are logged to the `llm_logs` table in SQLite via `src/server/models/debug.ts`.
   - **API Endpoints**: `/api/debug/logs` (GET) and `/api/debug/logs/clear` (POST) manage these logs.
-  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management. The layout is modularized into dedicated sub-components within the file:
+  - **Debug Panel (`src/components/DebugPanel.tsx`)**: A multi-tab utility (Logs, History, World) for real-time application state management. It features a cinematic backdrop that allows closing the panel by clicking outside. The layout is modularized into dedicated sub-components within the file:
     - **Logs (`LlmTraceViewer`)**: Displays chronological LLM interactions with a read-only CodeMirror viewer for code blocks and a custom **One Dark** styled tree viewer (`JsonExplorer`) for JSON payloads.
+    - **Console (`ConsoleViewer`)**: Real-time browser console log viewer with timestamp and log level filtering visualization. Captures `log`, `info`, `warn`, and `error`.
     - **History (`HistoryEditor`)**: Advanced JSON editor (via CodeMirror) for synchronizing the dialogue message buffer with schema validation.
     - **World (`WorldEditor`)**: Entity manifest editor powered by CodeMirror with schema-based hinting and validation.
 - **ObjectLink (`src/components/ObjectLink.tsx`)**: Handles the parsing and interaction of these links.

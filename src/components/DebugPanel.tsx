@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import {
   Terminal, X, ChevronDown, ChevronRight, RefreshCw, Trash2, Bug,
-  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle
+  GripHorizontal, Copy, Check, MessageSquare, Database, Save, Plus, AlertCircle, Monitor
 } from 'lucide-react';
 import CodeMirror from '@uiw/react-codemirror';
 import { json } from '@codemirror/lang-json';
@@ -11,6 +11,7 @@ import { EditorView } from '@codemirror/view';
 import { jsonSchema } from 'codemirror-json-schema';
 import { Message } from '@/types/dialogue';
 import { WorldState, WorldEntity } from '@/types/entities';
+import { consoleLogger, ConsoleLog } from '@/services/ConsoleLogger';
 
 interface LlmLog {
   id: string;
@@ -727,12 +728,82 @@ const WorldEditor: React.FC = () => {
   );
 };
 
+const ConsoleViewer: React.FC = () => {
+  const [logs, setLogs] = useState<ConsoleLog[]>(consoleLogger.getLogs());
+
+  useEffect(() => {
+    const unsubscribe = consoleLogger.subscribe(() => {
+      setLogs(consoleLogger.getLogs());
+    });
+    return unsubscribe;
+  }, []);
+
+  const clearLogs = () => {
+    consoleLogger.clearLogs();
+    setLogs([]);
+  };
+
+  return (
+    <div className="flex flex-col h-full overflow-hidden">
+      <div className="flex items-center justify-between h-9 mb-6 flex-shrink-0">
+        <div className="flex items-center gap-2 text-white/60">
+          <Monitor size={16} />
+          <h3 className="text-[10px] font-bold uppercase tracking-[0.2em]">CONSOLE_LOGS</h3>
+        </div>
+        <button
+          onClick={clearLogs}
+          className="flex items-center gap-2 px-3 py-1 bg-white/5 text-white/40 hover:bg-red-500/20 hover:text-red-400 rounded-sm border border-white/5 hover:border-red-500/20 transition-all"
+        >
+          <Trash2 size={14} />
+          <span className="text-[10px] font-bold uppercase tracking-wider">Clear</span>
+        </button>
+      </div>
+      <div className="flex-1 overflow-y-auto debug-scrollbar font-mono text-[11px] space-y-1 pr-1">
+        {logs.length === 0 ? (
+          <div className="flex flex-col items-center justify-center h-full text-white/10 py-20 grayscale opacity-50">
+            <Monitor size={48} className="mb-4" />
+            <p className="uppercase tracking-[0.3em] text-[10px] font-bold">No_Logs_Recorded</p>
+          </div>
+        ) : (
+          [...logs].reverse().map((log) => (
+            <div key={log.id} className="flex gap-3 py-1 px-2 border-b border-white/[0.03] hover:bg-white/[0.02] group">
+              <span className="text-white/20 select-none w-16 flex-shrink-0 text-[10px]">
+                {new Date(log.timestamp).toLocaleTimeString([], { hour12: false, hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+              </span>
+              <span className={`uppercase font-bold text-[9px] w-12 flex-shrink-0 mt-0.5 ${
+                log.level === 'error' ? 'text-red-400' :
+                log.level === 'warn' ? 'text-yellow-400' :
+                log.level === 'info' ? 'text-blue-400' :
+                'text-white/40'
+              }`}>
+                [{log.level}]
+              </span>
+              <pre className={`flex-1 whitespace-pre-wrap break-all ${
+                log.level === 'error' ? 'text-red-300/90' :
+                log.level === 'warn' ? 'text-yellow-200/80' :
+                'text-gray-300'
+              }`}>
+                {log.message}
+              </pre>
+            </div>
+          ))
+        )}
+        {logs.length > 0 && (
+          <div className="pt-8 text-center opacity-10 uppercase tracking-[0.4em] font-bold text-[9px]">
+            [ START_OF_LOG_STREAM ]
+          </div>
+        )}
+      </div>
+    </div>
+  );
+};
+
 export const DebugPanel: React.FC = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState<'logs' | 'history' | 'world'>('logs');
+  const [activeTab, setActiveTab] = useState<'logs' | 'console' | 'history' | 'world'>('logs');
 
   const TabButton: React.FC<{
-    id: 'logs' | 'history' | 'world',
+    id: 'logs' | 'console' | 'history' | 'world',
     label: string,
     icon: React.ReactNode
   }> = ({ id, label, icon }) => (
@@ -766,16 +837,25 @@ export const DebugPanel: React.FC = () => {
 
       <AnimatePresence>
         {isOpen && (
-          <motion.div
-            id="debug-panel-modal"
-            initial={{ opacity: 0, x: 300 }}
-            animate={{ opacity: 1, x: 0 }}
-            exit={{ opacity: 0, x: 300 }}
-            className="fixed inset-y-0 right-0 w-full md:w-160 bg-[#0a0a0a] text-gray-100 shadow-2xl z-50 flex flex-col border-l border-white/10 font-mono text-sm"
-          >
+          <>
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              onClick={() => setIsOpen(false)}
+              className="fixed inset-0 bg-black/40 backdrop-blur-[1px] z-40"
+            />
+            <motion.div
+              id="debug-panel-modal"
+              initial={{ opacity: 0, x: 300 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 300 }}
+              className="fixed inset-y-0 right-0 w-full md:w-160 bg-[#0a0a0a] text-gray-100 shadow-2xl z-50 flex flex-col border-l border-white/10 font-mono text-sm"
+            >
             <div className="flex items-center justify-between px-4 border-b border-white/10 bg-[#0a0a0a]/90 backdrop-blur-md sticky top-0 z-10">
               <div className="flex items-center">
                 <TabButton id="logs" label="Logs" icon={<Terminal size={14} />} />
+                <TabButton id="console" label="Console" icon={<Monitor size={14} />} />
                 <TabButton id="history" label="History" icon={<MessageSquare size={14} />} />
                 <TabButton id="world" label="World" icon={<Database size={14} />} />
               </div>
@@ -791,10 +871,12 @@ export const DebugPanel: React.FC = () => {
 
             <div className="flex-1 p-6 min-h-0 flex flex-col">
               {activeTab === 'logs' && <LlmTraceViewer />}
+              {activeTab === 'console' && <ConsoleViewer />}
               {activeTab === 'history' && <HistoryEditor />}
               {activeTab === 'world' && <WorldEditor />}
             </div>
           </motion.div>
+          </>
         )}
       </AnimatePresence>
     </>
